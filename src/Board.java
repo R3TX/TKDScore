@@ -2,22 +2,26 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Board {
-    JFrame ventana;
-    JLabel redRival;
-    JLabel blueRival;
+    private BoardBackground ventana;
+    private JLabel redRival;
+    private JLabel blueRival;
+
     public Board() {
-        ventana = new JFrame("Taekwondo Score");
-        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ventana.setAlwaysOnTop(true);
-        ventana.setResizable(false);
-        ventana.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        ventana = new BoardBackground();
+        ventana.getContentPane().setBackground(Color.BLUE);
         ventana.setVisible(true); // Mostrar la ventana
     }
 
     public void assignNames(){
-        redRival = new JLabel();
+        blueRival = new JLabel();
+        blueRival.setText("blueCompetitor");
+        blueRival.setVerticalAlignment(0);
+        blueRival.setHorizontalAlignment(0);
+        blueRival.setBackground(Color.BLUE);
+        blueRival.setBorder(BorderFactory.createBevelBorder(1));
+        blueRival.setVisible(true);
+        ventana.add(blueRival);
     }
-
 
 
 }
