@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TKDKeyListener implements KeyListener {
@@ -45,6 +46,15 @@ public class TKDKeyListener implements KeyListener {
                 scorePlus(jLabelList.get(7),1);
                 scorePlus(jLabelList.get(1),1);
                 break;
+            case '/':
+                int confirmDialog = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas continuar?", "Confirmación", JOptionPane.YES_NO_OPTION);
+
+                // Procesar la respuesta del usuario
+                if (confirmDialog == JOptionPane.YES_OPTION) {
+                    initializeComponents();
+                    // Realizar la acción que el usuario ha confirmado
+                }
+                break;
         }
 
     }
@@ -74,5 +84,25 @@ public class TKDKeyListener implements KeyListener {
         } while (preferredSize.width <= jLabel.getWidth() && preferredSize.height <= jLabel.getHeight());
         fontSize--;
         return fontSize/2;
+    }
+
+    private void initializeComponents(){
+        jLabelList = new ArrayList<>();
+
+        jLabelList.add(new JLabel("Insert Blue Name")); //blue contestant name 0
+        jLabelList.add(new JLabel("0")); //blue contestant score 1
+        jLabelList.add(new JLabel("GAM-JEOM")); //blue contestant faults name 2
+        jLabelList.add(new JLabel("0")); //blue contestant faults Score 3
+        jLabelList.add(new JLabel("Insert Red Name"));  //red contestant name 4
+        jLabelList.add(new JLabel("0")); //red contestant score 5
+        jLabelList.add(new JLabel("GAM-JEOM")); //red contestant faults name 6
+        jLabelList.add(new JLabel("0")); //red contestant faults Score 7
+        jLabelList.add(new JLabel("Match")); //8
+        jLabelList.add(new JLabel("1")); //9
+        jLabelList.add(new JLabel("Round"));  //10
+        jLabelList.add(new JLabel("1")); //11
+        jLabelList.add(new JLabel("0")); // round time 12
+
+
     }
 }
