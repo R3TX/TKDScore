@@ -13,11 +13,13 @@ public class BoardBackground extends JFrame {
 
     @Override
     public void paint(Graphics draw){
-        int half = getWidth()/2;
+        int separations = getWidth()/7;
         draw.setColor(Color.BLUE);
-        draw.fillRect(0, 0, half, getHeight());
+        draw.fillRect(0, 0, separations*3, getHeight());
+        draw.setColor(Color.BLACK);
+        draw.fillRect(separations*3, 0, separations, getHeight());
         draw.setColor(Color.RED);
-        draw.fillRect(half, 0, half, getHeight());
+        draw.fillRect(separations*4, 0, separations*3, getHeight());
 
     }
 }
