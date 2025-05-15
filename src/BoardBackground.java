@@ -1,25 +1,19 @@
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.Graphics;
+import java.awt.Color;
 
-public class BoardBackground extends JFrame {
-
-    public BoardBackground() throws HeadlessException {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setAlwaysOnTop(true);
-        setResizable(false);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setLayout(new FlowLayout());
-    }
+public class BoardBackground extends JPanel {
 
     @Override
-    public void paint(Graphics draw){
-        int separations = getWidth()/7;
+    public void paintComponent(Graphics draw){
+        super.paintComponent(draw);
+        final int widthSeparations = getWidth()/7;
         draw.setColor(Color.BLUE);
-        draw.fillRect(0, 0, separations*3, getHeight());
+        draw.fillRect(0, 0, widthSeparations*3, getHeight());
         draw.setColor(Color.BLACK);
-        draw.fillRect(separations*3, 0, separations, getHeight());
+        draw.fillRect(widthSeparations*3, 0, widthSeparations, getHeight());
         draw.setColor(Color.RED);
-        draw.fillRect(separations*4, 0, separations*3, getHeight());
-
+        draw.fillRect(widthSeparations*4, 0, widthSeparations*3, getHeight());
     }
+
 }
