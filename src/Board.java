@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -173,6 +174,10 @@ public class Board {
         jLabelList.add(new JLabel("Round"));  //10
         jLabelList.add(new JLabel("1")); //11
         jLabelList.add(new JLabel("0")); // round time 12
+
+        TKDKeyListener tkdKeyListener = new TKDKeyListener(jLabelList);
+        mainWindow.addKeyListener(tkdKeyListener);
+        mainWindow.requestFocusInWindow();
     }
 
     private void setAllVisible(){
