@@ -1,29 +1,22 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Board {
+public class Board implements KeyListener{
     private JFrame mainWindow;
     private List<JLabel> jLabelList;
-    /*
-    private JLabel redName;
-    private JLabel redScore;
-    private JLabel redGamJeomName;
-    private JLabel redGamJeomScore;
-    private JLabel blueName;
-    private JLabel blueScore;
-    private JLabel blueGamJeomName;
-    private JLabel blueGamJeomScore;
-    private JLabel matchName;
-    private JLabel matchScore;
-    private JLabel roundName;
-    private JLabel roundScore;
-    private JLabel timeLabel;
-    */
+    private Cronometer cronometer;
+
+    private Dimension screenSize;
+    private int widthSeparation;
+    private Font currentFont;
+    private int heightLabel;
+    private int defaultFontSize;
 
     private BoardBackground boardBackground;
 
@@ -31,8 +24,10 @@ public class Board {
         initializeComponents();
         setFrame();
         setAllVisible();
+        screenSize();
         alignLabels();
-        //addComponents();
+        setLabelsName();
+
     }
 /*
     private void alignLabels(){
@@ -67,14 +62,22 @@ public class Board {
 
     }
 */
+    private void screenSize(){
+        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        widthSeparation = (int) (screenSize.getWidth() / 7);
+        currentFont= jLabelList.get(0).getFont();
+        jLabelList.get(0).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),52));
+        heightLabel = (int) jLabelList.get(0).getPreferredSize().getHeight();
+        defaultFontSize=52;
+    }
     private void alignLabels() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int widthSeparation = (int) (screenSize.getWidth() / 7);
+       /* Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        //int widthSeparation = (int) (screenSize.getWidth() / 7);
         Font currentFont= jLabelList.get(0).getFont();
         jLabelList.get(0).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),52));
         int heightLabel = (int) jLabelList.get(0).getPreferredSize().getHeight();
         int defaultFontSize=52;
-
+*/
         // Configuración de los labels azules
         alignLabel(jLabelList.get(0), 0, 0, widthSeparation * 3, heightLabel,defaultFontSize); // Nombre
         alignLabel(jLabelList.get(2), 0, (int) (screenSize.getHeight() - (heightLabel * 2)), widthSeparation * 2, heightLabel,defaultFontSize); // Faltas nombre
@@ -89,7 +92,6 @@ public class Board {
         int widthSeparationScore = (int) (widthSeparation/3);
         jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation*2, (int) (screenSize.getHeight()-(heightLabel*3)));
         findFontSizeByJLabelSize(currentFont, jLabelList.get(1));
-        jLabelList.get(1).setBorder(BorderFactory.createBevelBorder(1));
         alignLabel(jLabelList.get(5), xRojo + widthSeparationScore, heightLabel, widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 3)),jLabelList.get(1).getFont().getSize()); // Puntuación
 
         setScoreLabelBackground(new Color(0,128,255), jLabelList.get(1));
@@ -107,24 +109,8 @@ public class Board {
         for (int i = 8; i<13;i++) {
             jLabelList.get(i).setForeground(Color.WHITE);
         }
-
-        setTimeFormat();
-
-
     }
-    public void setTimeFormat(){
-        // Obtener la fecha y hora actual
-        Date fechaHora = new Date();
 
-        // Crear un objeto SimpleDateFormat para el formato deseado
-        SimpleDateFormat formato = new SimpleDateFormat("mm:ss"); // Formato de hora: hh:mm:ss (horas, minutos y segundos)
-
-        // Formatear la fecha y hora
-        String tiempoFormateado = formato.format(fechaHora);
-
-        // Establecer el texto del JLabel con el tiempo formateado
-        jLabelList.get(12).setText(tiempoFormateado);
-    }
 
     public void setScoreLabelBackground(Color color, JLabel label){
         label.setBackground(color);
@@ -134,7 +120,6 @@ public class Board {
     private void alignLabel(JLabel label, int x, int y, int width, int height, int fontSize) {
         label.setBounds(x, y, width, height);
         label.setFont(getFontWithSize(label, fontSize));
-        //label.setBorder(BorderFactory.createBevelBorder(1));
     }
 
     private Font getFontWithSize(JLabel label, int size) {
@@ -155,7 +140,7 @@ public class Board {
         fontSize--;
         return fontSize;
     }
-
+//866*363 654*550
     private void initializeComponents(){
         jLabelList = new ArrayList<>();
         mainWindow = new JFrame("TKD Score");
@@ -173,46 +158,117 @@ public class Board {
         jLabelList.add(new JLabel("1")); //9
         jLabelList.add(new JLabel("Round"));  //10
         jLabelList.add(new JLabel("1")); //11
-        jLabelList.add(new JLabel("0")); // round time 12
+        jLabelList.add(new JLabel("03:00")); // round time 12
 
-        TKDKeyListener tkdKeyListener = new TKDKeyListener(jLabelList);
-        mainWindow.addKeyListener(tkdKeyListener);
+        cronometer = new Cronometer(jLabelList.get(12));
+       // TKDKeyListener tkdKeyListener = new TKDKeyListener(jLabelList);
+        mainWindow.addKeyListener(this);
         mainWindow.requestFocusInWindow();
     }
 
+    private void setLabelsName(){
+        jLabelList.get(1).setName("blueName");
+        jLabelList.get(3).setName("blueGam");
+        jLabelList.get(4).setName("redName");
+        jLabelList.get(7).setName("redGam");
+        jLabelList.get(9).setName("match");
+        jLabelList.get(11).setName("round");
+        jLabelList.get(12).setName("timer");
+    }
+
     private void setAllVisible(){
+        TDKMouseListener tdkMouseListener = new TDKMouseListener();
         jLabelList.forEach(x-> {
             x.setVisible(true);
             x.setForeground(Color.BLACK);
             x.setHorizontalAlignment(JLabel.CENTER);
             x.setVerticalAlignment(JLabel.CENTER);
+            x.addMouseListener(tdkMouseListener);
             boardBackground.add(x);
         });
     }
-/*
-    private void addComponents(){
-        boardBackground.add(redName);
-        boardBackground.add(redScore);
-        boardBackground.add(redGamJeomName);
-        boardBackground.add(redGamJeomScore);
-        boardBackground.add(blueName);
-        boardBackground.add(blueScore);
-        boardBackground.add(blueGamJeomName);
-        boardBackground.add(blueGamJeomScore);
-        boardBackground.add(matchName);
-        boardBackground.add(matchScore);
-        boardBackground.add(roundName);
-        boardBackground.add(roundScore);
-        boardBackground.add(timeLabel);
-    }
-*/
+
     private void setFrame(){
         mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainWindow.setAlwaysOnTop(false);
         //boardBackground.setResizable(false);
         mainWindow.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        mainWindow.setMinimumSize(new Dimension(200,200));
         boardBackground.setLayout(null);
         mainWindow.add(boardBackground);
         mainWindow.setVisible(true);
+    }
+
+    private void scorePlus(JLabel jLabel,int plus){
+        int currentScore=Integer.parseInt(jLabel.getText())+plus;
+        jLabel.setText(String.valueOf(currentScore));
+        if(currentScore>9){
+            int widthSeparationScore = (int) (widthSeparation/3);
+            jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation*2, (int) (screenSize.getHeight()-(heightLabel*3)));
+            jLabel.setFont(new Font(jLabel.getFont().getFontName(),jLabel.getFont().getStyle(),findFontSizeByJLabelSize(jLabel.getFont(),jLabel)));
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int keyCode = e.getKeyChar();
+        switch (keyCode){
+            case '1':
+                scorePlus(jLabelList.get(1),1);
+                break;
+            case '3':
+                scorePlus(jLabelList.get(5),1);
+                break;
+            case '4':
+                scorePlus(jLabelList.get(1),2);
+                break;
+            case '6':
+                scorePlus(jLabelList.get(5),2);
+                break;
+            case '7':
+                scorePlus(jLabelList.get(1),3);
+                break;
+            case '9':
+                scorePlus(jLabelList.get(5),3);
+                break;
+            case '-':
+                scorePlus(jLabelList.get(3),1);
+                scorePlus(jLabelList.get(5),1);
+                break;
+            case '+':
+                scorePlus(jLabelList.get(7),1);
+                scorePlus(jLabelList.get(1),1);
+                break;
+            case '/':
+                int confirmDialog = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas continuar?", "Confirmación", JOptionPane.YES_NO_OPTION);
+
+                // Procesar la respuesta del usuario
+                if (confirmDialog == JOptionPane.YES_OPTION) {
+                    mainWindow.dispose();
+                    initializeComponents();
+                    setFrame();
+                    setAllVisible();
+                    alignLabels();
+                }
+                break;
+            case KeyEvent.VK_ENTER:
+                    cronometer.startStopTimer();
+                    break;
+            case '.':
+                jLabelList.get(12).setText("03:00");
+                cronometer.restarTimer("03:00");
+                break;
+
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
     }
 }
