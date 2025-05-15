@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Board {
@@ -91,6 +93,36 @@ public class Board {
 
         setScoreLabelBackground(new Color(0,128,255), jLabelList.get(1));
         setScoreLabelBackground(new Color(255,51,51), jLabelList.get(5));
+
+        //black line labels
+        int xBlack = widthSeparation * 3;
+        alignLabel(jLabelList.get(8), xBlack, heightLabel, widthSeparation, heightLabel,52);
+        alignLabel(jLabelList.get(9), xBlack, heightLabel*2, widthSeparation, heightLabel,52);
+        alignLabel(jLabelList.get(10), xBlack, (int) (screenSize.getHeight()-(heightLabel*4)), widthSeparation, heightLabel,52);
+        alignLabel(jLabelList.get(11), xBlack, (int) (screenSize.getHeight()-(heightLabel*3)), widthSeparation, heightLabel,52);
+
+        alignLabel(jLabelList.get(12), xBlack, heightLabel*6, widthSeparation, heightLabel,52);
+
+        for (int i = 8; i<13;i++) {
+            jLabelList.get(i).setForeground(Color.WHITE);
+        }
+
+        setTimeFormat();
+
+
+    }
+    public void setTimeFormat(){
+        // Obtener la fecha y hora actual
+        Date fechaHora = new Date();
+
+        // Crear un objeto SimpleDateFormat para el formato deseado
+        SimpleDateFormat formato = new SimpleDateFormat("mm:ss"); // Formato de hora: hh:mm:ss (horas, minutos y segundos)
+
+        // Formatear la fecha y hora
+        String tiempoFormateado = formato.format(fechaHora);
+
+        // Establecer el texto del JLabel con el tiempo formateado
+        jLabelList.get(12).setText(tiempoFormateado);
     }
 
     public void setScoreLabelBackground(Color color, JLabel label){
@@ -136,11 +168,11 @@ public class Board {
         jLabelList.add(new JLabel("0")); //red contestant score 5
         jLabelList.add(new JLabel("GAM-JEOM")); //red contestant faults name 6
         jLabelList.add(new JLabel("0")); //red contestant faults Score 7
-        jLabelList.add(new JLabel("Match"));
-        jLabelList.add(new JLabel("1"));
-        jLabelList.add(new JLabel("Round"));
-        jLabelList.add(new JLabel("1"));
-        jLabelList.add(new JLabel("0")); // round time
+        jLabelList.add(new JLabel("Match")); //8
+        jLabelList.add(new JLabel("1")); //9
+        jLabelList.add(new JLabel("Round"));  //10
+        jLabelList.add(new JLabel("1")); //11
+        jLabelList.add(new JLabel("0")); // round time 12
     }
 
     private void setAllVisible(){
