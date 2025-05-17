@@ -1,3 +1,7 @@
+package listeners;
+
+import utils.TDKScoreUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -68,22 +72,8 @@ public class TKDKeyListener implements KeyListener {
         int currentScore=Integer.parseInt(jLabel.getText())+plus;
         jLabel.setText(String.valueOf(currentScore));
         if(currentScore>10){
-            jLabel.setFont(new Font(jLabel.getFont().getFontName(),jLabel.getFont().getStyle(),findFontSizeByJLabelSize(jLabel.getFont(),jLabel)));
+            jLabel.setFont(new Font(jLabel.getFont().getFontName(),jLabel.getFont().getStyle(), TDKScoreUtils.findFontSizeByJLabelSize(jLabel.getFont(),jLabel)));
         }
-    }
-
-    private int findFontSizeByJLabelSize(Font font, JLabel jLabel){
-        int fontSize = 1;
-        Dimension preferredSize;
-
-        do{
-            font = new Font(font.getFontName(), font.getStyle(), fontSize);
-            jLabel.setFont(font);
-            preferredSize = jLabel.getPreferredSize();
-            fontSize++;
-        } while (preferredSize.width <= jLabel.getWidth() && preferredSize.height <= jLabel.getHeight());
-        fontSize--;
-        return fontSize/2;
     }
 
     private void initializeComponents(){
