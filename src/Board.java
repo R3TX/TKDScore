@@ -1,16 +1,22 @@
+import listeners.Chronometer;
+import listeners.TDKMouseListener;
+import listeners.TKDScorePropertyChangeListener;
+import utils.TDKScoreUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.text.SimpleDateFormat;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class Board implements KeyListener{
+
+public class Board implements KeyListener {
     private JFrame mainWindow;
     private List<JLabel> jLabelList;
-    private Cronometer cronometer;
+    private Chronometer chronometer;
 
     private Dimension screenSize;
     private int widthSeparation;
@@ -18,70 +24,38 @@ public class Board implements KeyListener{
     private int heightLabel;
     private int defaultFontSize;
 
+
     private BoardBackground boardBackground;
 
     public Board() {
         initializeComponents();
+
+        setChronometerTimes();
         setFrame();
         setAllVisible();
         screenSize();
         alignLabels();
         setLabelsName();
-
+        addPropertyChange();
     }
-/*
-    private void alignLabels(){
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        // Name size and font
-        int widthSeparation = (int) (screenSize.getWidth()/7);
-        Font currentFont= jLabelList.get(0).getFont();
-        jLabelList.get(0).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),52));
-        int heigthLabel = (int) jLabelList.get(0).getPreferredSize().getHeight();
-        jLabelList.get(0).setBounds(0, 0, widthSeparation*3, heigthLabel);
-        jLabelList.get(0).setBorder(BorderFactory.createBevelBorder(1));
-        //End Name size and font
-        //Score Size and font
-        int widthSeparationScore = (int) (widthSeparation/3);
 
-        jLabelList.get(1).setBounds(widthSeparationScore, heigthLabel, widthSeparation*2, (int) (screenSize.getHeight()-(heigthLabel*3)));
-        findFontSizeByJLabelSize(currentFont, jLabelList.get(1));
-        jLabelList.get(1).setBorder(BorderFactory.createBevelBorder(1));
-
-
-        //faults name
-        jLabelList.get(2).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),52));
-        int widthLabel = (int) jLabelList.get(2).getPreferredSize().getWidth();
-        jLabelList.get(2).setBounds(0, (int) (screenSize.getHeight()-(heigthLabel*2)), widthLabel, heigthLabel);
-        //jLabelList.get(2).setBorder(BorderFactory.createBevelBorder(1));
-        jLabelList.get(2).setHorizontalAlignment(JLabel.LEFT);
-
-        //faults score
-        jLabelList.get(3).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),52));
-        jLabelList.get(3).setBounds(widthLabel, (int) (screenSize.getHeight()-(heigthLabel*2)), widthLabel, heigthLabel);
-        jLabelList.get(3).setBorder(BorderFactory.createBevelBorder(1));
-
-    }
-*/
-    private void screenSize(){
+    private void screenSize() {
+        defaultFontSize = 52;
         screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         widthSeparation = (int) (screenSize.getWidth() / 7);
-        currentFont= jLabelList.get(0).getFont();
-        jLabelList.get(0).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),52));
+        //widthSeparation = boardBackground.getWidth() / 7;
+        currentFont = jLabelList.get(0).getFont();
+        jLabelList.get(0).setFont(new Font(currentFont.getFontName(), currentFont.getStyle(), defaultFontSize));
         heightLabel = (int) jLabelList.get(0).getPreferredSize().getHeight();
-        defaultFontSize=52;
+
     }
+
     private void alignLabels() {
-       /* Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        //int widthSeparation = (int) (screenSize.getWidth() / 7);
-        Font currentFont= jLabelList.get(0).getFont();
-        jLabelList.get(0).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),52));
-        int heightLabel = (int) jLabelList.get(0).getPreferredSize().getHeight();
-        int defaultFontSize=52;
-*/
+
         // Configuración de los labels azules
-        alignLabel(jLabelList.get(0), 0, 0, widthSeparation * 3, heightLabel,defaultFontSize); // Nombre
-        alignLabel(jLabelList.get(2), 0, (int) (screenSize.getHeight() - (heightLabel * 2)), widthSeparation * 2, heightLabel,defaultFontSize); // Faltas nombre
-        alignLabel(jLabelList.get(3), widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 2)), widthSeparation, heightLabel,defaultFontSize); // Faltas puntuación
+        alignLabel(jLabelList.get(0), 0, 0, widthSeparation * 3, heightLabel, defaultFontSize); // Nombre
+        alignLabel(jLabelList.get(2), 0, (int) (screenSize.getHeight() - (heightLabel * 2)), widthSeparation * 2, heightLabel, defaultFontSize); // Faltas nombre
+        alignLabel(jLabelList.get(3), widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 2)), widthSeparation, heightLabel, defaultFontSize); // Faltas puntuación
 
         // Configuración de los labels rojos
         int xRojo = widthSeparation * 4;
@@ -89,30 +63,43 @@ public class Board implements KeyListener{
         alignLabel(jLabelList.get(6), xRojo, (int) (screenSize.getHeight() - (heightLabel * 2)), widthSeparation * 2, heightLabel, defaultFontSize); // Faltas nombre
         alignLabel(jLabelList.get(7), xRojo + widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 2)), widthSeparation, heightLabel, defaultFontSize); // Faltas puntuación
 
-        int widthSeparationScore = (int) (widthSeparation/3);
-        jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation*2, (int) (screenSize.getHeight()-(heightLabel*3)));
-        findFontSizeByJLabelSize(currentFont, jLabelList.get(1));
-        alignLabel(jLabelList.get(5), xRojo + widthSeparationScore, heightLabel, widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 3)),jLabelList.get(1).getFont().getSize()); // Puntuación
+        //Configuration for score labels
+        int widthSeparationScore = (int) (widthSeparation / 3);
+        jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 3)));
+        TDKScoreUtils.findFontSizeByJLabelSize(currentFont, jLabelList.get(1));
+        alignLabel(jLabelList.get(5), xRojo + widthSeparationScore, heightLabel, widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 3)), jLabelList.get(1).getFont().getSize()); // Puntuación
 
-        setScoreLabelBackground(new Color(0,128,255), jLabelList.get(1));
-        setScoreLabelBackground(new Color(255,51,51), jLabelList.get(5));
+        setScoreLabelBackground( TDKScoreUtils.BLUE_COLOR, jLabelList.get(1));
+        setScoreLabelBackground(TDKScoreUtils.RED_COLOR, jLabelList.get(5));
+
+        //winnings labels
+        int boardBackgroundWidth = boardBackground.getWidth() / 7;
+        //jLabelList.get(15).setForeground(Color.YELLOW);
+        // jLabelList.get(13).setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        FontMetrics fontMetrics = jLabelList.get(13).getFontMetrics(currentFont);
+        alignLabel(jLabelList.get(13), widthSeparationScore * 7, heightLabel, fontMetrics.charWidth('W') * 12, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(14), widthSeparationScore * 7, heightLabel * 2, fontMetrics.charWidth('W') * 12, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(15), boardBackgroundWidth * 4, heightLabel, fontMetrics.charWidth('W') * 12, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(16), boardBackgroundWidth * 4, heightLabel * 2, fontMetrics.charWidth('W') * 12, heightLabel, defaultFontSize);
 
         //black line labels
-        int xBlack = widthSeparation * 3;
-        alignLabel(jLabelList.get(8), xBlack, heightLabel, widthSeparation, heightLabel,52);
-        alignLabel(jLabelList.get(9), xBlack, heightLabel*2, widthSeparation, heightLabel,52);
-        alignLabel(jLabelList.get(10), xBlack, (int) (screenSize.getHeight()-(heightLabel*4)), widthSeparation, heightLabel,52);
-        alignLabel(jLabelList.get(11), xBlack, (int) (screenSize.getHeight()-(heightLabel*3)), widthSeparation, heightLabel,52);
+        int xBlack = boardBackgroundWidth * 3;
+        alignLabel(jLabelList.get(8), xBlack, heightLabel, widthSeparation, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(9), xBlack, heightLabel * 2, widthSeparation, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(10), xBlack, (int) (screenSize.getHeight() - (heightLabel * 4)), widthSeparation, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(11), xBlack, (int) (screenSize.getHeight() - (heightLabel * 3)), widthSeparation, heightLabel, defaultFontSize);
 
-        alignLabel(jLabelList.get(12), xBlack, heightLabel*6, widthSeparation, heightLabel,52);
+        alignLabel(jLabelList.get(12), xBlack, heightLabel * 6, widthSeparation, heightLabel, 80);
 
-        for (int i = 8; i<13;i++) {
+        for (int i = 8; i < 13; i++) {
             jLabelList.get(i).setForeground(Color.WHITE);
         }
+
+        jLabelList.get(12).setForeground(Color.YELLOW);
     }
 
 
-    public void setScoreLabelBackground(Color color, JLabel label){
+    public void setScoreLabelBackground(Color color, JLabel label) {
         label.setBackground(color);
         label.setOpaque(true);
     }
@@ -127,24 +114,12 @@ public class Board implements KeyListener{
         return new Font(currentFont.getFontName(), currentFont.getStyle(), size);
     }
 
-    private int findFontSizeByJLabelSize(Font font, JLabel jLabel){
-        int fontSize = 1;
-        Dimension preferredSize;
 
-        do{
-            font = new Font(font.getFontName(), font.getStyle(), fontSize);
-            jLabel.setFont(font);
-            preferredSize = jLabel.getPreferredSize();
-            fontSize++;
-         } while (preferredSize.width <= jLabel.getWidth() && preferredSize.height <= jLabel.getHeight());
-        fontSize--;
-        return fontSize;
-    }
-//866*363 654*550
-    private void initializeComponents(){
+    //866*363 654*550
+    private void initializeComponents() {
         jLabelList = new ArrayList<>();
         mainWindow = new JFrame("TKD Score");
-        boardBackground= new BoardBackground();
+        boardBackground = new BoardBackground();
 
         jLabelList.add(new JLabel("Insert Blue Name")); //blue contestant name 0
         jLabelList.add(new JLabel("0")); //blue contestant score 1
@@ -158,54 +133,84 @@ public class Board implements KeyListener{
         jLabelList.add(new JLabel("1")); //9
         jLabelList.add(new JLabel("Round"));  //10
         jLabelList.add(new JLabel("1")); //11
-        jLabelList.add(new JLabel("03:00")); // round time 12
+        jLabelList.add(new JLabel("02:00")); // round time 12
+        jLabelList.add(new JLabel("WON")); // won name for blue 13
+        jLabelList.add(new JLabel("0")); // won score for blue 14
+        jLabelList.add(new JLabel("WON")); // won name for red 15
+        jLabelList.add(new JLabel("0")); // won score for red 16
 
-        cronometer = new Cronometer(jLabelList.get(12));
-       // TKDKeyListener tkdKeyListener = new TKDKeyListener(jLabelList);
+
+        // listeners.TKDKeyListener tkdKeyListener = new listeners.TKDKeyListener(jLabelList);
         mainWindow.addKeyListener(this);
         mainWindow.requestFocusInWindow();
     }
 
-    private void setLabelsName(){
-        jLabelList.get(1).setName("blueName");
+    private void addPropertyChange() {
+        jLabelList.get(12).addPropertyChangeListener("text", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if ("text".equals(evt.getPropertyName())) {
+
+                    // Perform actions based on the new text value
+                }
+            }
+        });
+    }
+
+
+
+    private void setChronometerTimes() {
+
+        String matchTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del round", TDKScoreUtils.TIME_REGEX);
+        String breakTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso", TDKScoreUtils.TIME_REGEX);
+        jLabelList.get(12).setText(matchTime);
+        chronometer = new Chronometer(jLabelList.get(12), matchTime, breakTime);
+    }
+
+    private void setLabelsName() {
+        jLabelList.get(0).setName("blueName");
         jLabelList.get(3).setName("blueGam");
         jLabelList.get(4).setName("redName");
         jLabelList.get(7).setName("redGam");
         jLabelList.get(9).setName("match");
         jLabelList.get(11).setName("round");
         jLabelList.get(12).setName("timer");
+        jLabelList.get(14).setName("blueWin");
+        jLabelList.get(16).setName("redWin");
     }
 
-    private void setAllVisible(){
+    private void setAllVisible() {
         TDKMouseListener tdkMouseListener = new TDKMouseListener();
-        jLabelList.forEach(x-> {
+        TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList,chronometer);
+        jLabelList.forEach(x -> {
             x.setVisible(true);
             x.setForeground(Color.BLACK);
             x.setHorizontalAlignment(JLabel.CENTER);
             x.setVerticalAlignment(JLabel.CENTER);
             x.addMouseListener(tdkMouseListener);
+            x.addPropertyChangeListener(tkdScorePropertyChangeListener);
             boardBackground.add(x);
         });
     }
 
-    private void setFrame(){
+    private void setFrame() {
         mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainWindow.setAlwaysOnTop(false);
         //boardBackground.setResizable(false);
         mainWindow.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        mainWindow.setMinimumSize(new Dimension(200,200));
+        mainWindow.setMinimumSize(new Dimension(200, 200));
         boardBackground.setLayout(null);
         mainWindow.add(boardBackground);
         mainWindow.setVisible(true);
     }
 
-    private void scorePlus(JLabel jLabel,int plus){
-        int currentScore=Integer.parseInt(jLabel.getText())+plus;
+    private void scorePlus(JLabel jLabel, int plus) {
+        int currentScore = Integer.parseInt(jLabel.getText()) + plus;
         jLabel.setText(String.valueOf(currentScore));
-        if(currentScore>9){
-            int widthSeparationScore = (int) (widthSeparation/3);
-            jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation*2, (int) (screenSize.getHeight()-(heightLabel*3)));
-            jLabel.setFont(new Font(jLabel.getFont().getFontName(),jLabel.getFont().getStyle(),findFontSizeByJLabelSize(jLabel.getFont(),jLabel)));
+        if (currentScore > 9) {
+            int widthSeparationScore = (widthSeparation / 3);
+            jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 3)));
+            jLabel.setFont(new Font(jLabel.getFont().getFontName(), jLabel.getFont().getStyle(), TDKScoreUtils.findFontSizeByJLabelSize(jLabel.getFont(), jLabel)));
         }
     }
 
@@ -217,32 +222,32 @@ public class Board implements KeyListener{
     @Override
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyChar();
-        switch (keyCode){
+        switch (keyCode) {
             case '1':
-                scorePlus(jLabelList.get(1),1);
+                scorePlus(jLabelList.get(1), 1);
                 break;
             case '3':
-                scorePlus(jLabelList.get(5),1);
+                scorePlus(jLabelList.get(5), 1);
                 break;
             case '4':
-                scorePlus(jLabelList.get(1),2);
+                scorePlus(jLabelList.get(1), 2);
                 break;
             case '6':
-                scorePlus(jLabelList.get(5),2);
+                scorePlus(jLabelList.get(5), 2);
                 break;
             case '7':
-                scorePlus(jLabelList.get(1),3);
+                scorePlus(jLabelList.get(1), 3);
                 break;
             case '9':
-                scorePlus(jLabelList.get(5),3);
+                scorePlus(jLabelList.get(5), 3);
                 break;
             case '-':
-                scorePlus(jLabelList.get(3),1);
-                scorePlus(jLabelList.get(5),1);
+                scorePlus(jLabelList.get(5), 1);
+                scorePlus(jLabelList.get(3), 1);
                 break;
             case '+':
-                scorePlus(jLabelList.get(7),1);
-                scorePlus(jLabelList.get(1),1);
+                scorePlus(jLabelList.get(1), 1);
+                scorePlus(jLabelList.get(7), 1);
                 break;
             case '/':
                 int confirmDialog = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas continuar?", "Confirmación", JOptionPane.YES_NO_OPTION);
@@ -257,12 +262,9 @@ public class Board implements KeyListener{
                 }
                 break;
             case KeyEvent.VK_ENTER:
-                    cronometer.startStopTimer();
-                    break;
-            case '.':
-                jLabelList.get(12).setText("03:00");
-                cronometer.restarTimer("03:00");
+                chronometer.startStopTimer();
                 break;
+
 
         }
     }
