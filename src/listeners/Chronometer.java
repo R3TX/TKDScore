@@ -7,7 +7,7 @@ public class Chronometer {
     private int seconds;
     private String matchTime;
     private String breakTime;
-    public static boolean IS_BREAK_TIME;
+    private boolean IS_BREAK_TIME;
     private JLabel timerLabel;
 
     private final Timer timer;
@@ -76,5 +76,21 @@ public class Chronometer {
 
     public String getMatchTime() {
         return matchTime;
+    }
+
+    public void setMatchTime(String matchTime) {
+        this.matchTime = matchTime;
+    }
+
+    public void setBreakTime(String breakTime) {
+        this.breakTime = breakTime;
+    }
+
+    public void setIsBreakTime(boolean isBreakTime) {
+        IS_BREAK_TIME = isBreakTime;
+    }
+
+    public boolean isIS_BREAK_TIME() {
+        return IS_BREAK_TIME;
     }
 }

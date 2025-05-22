@@ -9,6 +9,11 @@ import java.awt.event.MouseListener;
 
 public class TDKMouseListener implements MouseListener {
 
+    private Chronometer chronometer;
+
+    public TDKMouseListener(Chronometer chronometer) {
+        this.chronometer = chronometer;
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -21,16 +26,20 @@ public class TDKMouseListener implements MouseListener {
                 switch (label.getName()) {
                     case "blueName":
                     case "redName":
-                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NAME, TDKScoreUtils.NAME_REGEX));
+                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NAME, TDKScoreUtils.NAME_REGEX, label.getText()));
                         break;
                     case "match":
                     case "round":
                     case "blueGam":
                     case "redGam":
-                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC, TDKScoreUtils.NUMERIC_REGEX));
+                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC, TDKScoreUtils.NUMERIC_REGEX, label.getText()));
                         break;
                     case "timer":
-                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME, TDKScoreUtils.TIME_REGEX));
+                        chronometer.setMatchTime(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del round", TDKScoreUtils.TIME_REGEX, chronometer.getMatchTime()));
+                        chronometer.setBreakTime(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso", TDKScoreUtils.TIME_REGEX, chronometer.getBreakTime()));
+                        chronometer.restartTime(chronometer.getMatchTime());
+                        chronometer.setIsBreakTime(false);
+                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME, TDKScoreUtils.TIME_REGEX, chronometer.getMatchTime()));
                         break;
                 }
             }

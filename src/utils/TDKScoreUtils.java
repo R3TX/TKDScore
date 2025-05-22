@@ -17,11 +17,15 @@ public class TDKScoreUtils {
     public static Color RED_COLOR = new Color(255, 51, 51);
 
 
-    public static String getInputText(String inputMessage, String regex){
+    public static String getInputText(String inputMessage, String regex, String defaultValue){
         String names = JOptionPane.showInputDialog(null,inputMessage, TITTLE_MESSAGE,JOptionPane.QUESTION_MESSAGE);
-        while(StringUtils.isBlank(names) || !names.matches(regex)){
+
+        while(null != names && (StringUtils.isWhitespace(names) || !names.matches(regex))){
             JOptionPane.showMessageDialog(null, "Debe ingresar un valor correcto. Inténtelo nuevamente.");
             names = JOptionPane.showInputDialog(null,inputMessage, TITTLE_MESSAGE,JOptionPane.QUESTION_MESSAGE);
+        }
+        if(null == names){
+            return defaultValue;
         }
         return names;
 
