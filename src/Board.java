@@ -1,21 +1,20 @@
 import listeners.Chronometer;
 import listeners.TDKMouseListener;
+import listeners.TKDKeyListener;
 import listeners.TKDScorePropertyChangeListener;
 import utils.TDKScoreUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
-public class Board implements KeyListener {
+public class Board {//implements KeyListener {
     private JFrame mainWindow;
     private List<JLabel> jLabelList;
+    private List<String> jLabelTextList;
     private Chronometer chronometer;
 
     private Dimension screenSize;
@@ -29,14 +28,12 @@ public class Board implements KeyListener {
 
     public Board() {
         initializeComponents();
-
         setChronometerTimes();
         setFrame();
         setAllVisible();
         screenSize();
         alignLabels();
         setLabelsName();
-        addPropertyChange();
     }
 
     private void screenSize() {
@@ -118,9 +115,43 @@ public class Board implements KeyListener {
     //866*363 654*550
     private void initializeComponents() {
         jLabelList = new ArrayList<>();
+        jLabelTextList = new ArrayList<>();
         mainWindow = new JFrame("TKD Score");
         boardBackground = new BoardBackground();
 
+        createLabelTextList();
+        createLabelsList();
+        // listeners.TKDKeyListener tkdKeyListener = new listeners.TKDKeyListener(jLabelList);
+        //mainWindow.addKeyListener(this);
+        mainWindow.requestFocusInWindow();
+    }
+
+    private void createLabelTextList(){
+        jLabelTextList.add("Nombre Azul"); //blue contestant name 0
+        jLabelTextList.add("0"); //blue contestant score 1
+        jLabelTextList.add("GAM-JEOM"); //blue contestant faults name 2
+        jLabelTextList.add("0"); //blue contestant faults Score 3
+        jLabelTextList.add("Nombre Rojo");  //red contestant name 4
+        jLabelTextList.add("0"); //red contestant score 5
+        jLabelTextList.add("GAM-JEOM"); //red contestant faults name 6
+        jLabelTextList.add("0"); //red contestant faults Score 7
+        jLabelTextList.add("Match"); //8
+        jLabelTextList.add("1"); //9
+        jLabelTextList.add("Round");  //10
+        jLabelTextList.add("1"); //11
+        jLabelTextList.add(Objects.isNull(chronometer)?"02:00":chronometer.getMatchTime()); // round time 12
+        jLabelTextList.add("WON"); // won name for blue 13
+        jLabelTextList.add("0"); // won score for blue 14
+        jLabelTextList.add("WON"); // won name for red 15
+        jLabelTextList.add("0"); // won score for red 16
+    }
+
+    private void createLabelsList(){
+        for (String s : jLabelTextList) {
+            jLabelList.add(new JLabel(s));
+        }
+        
+        /*
         jLabelList.add(new JLabel("Insert Blue Name")); //blue contestant name 0
         jLabelList.add(new JLabel("0")); //blue contestant score 1
         jLabelList.add(new JLabel("GAM-JEOM")); //blue contestant faults name 2
@@ -133,36 +164,19 @@ public class Board implements KeyListener {
         jLabelList.add(new JLabel("1")); //9
         jLabelList.add(new JLabel("Round"));  //10
         jLabelList.add(new JLabel("1")); //11
-        jLabelList.add(new JLabel("02:00")); // round time 12
+        jLabelList.add(new JLabel(Objects.isNull(chronometer)?"02:00":chronometer.getMatchTime())); // round time 12
         jLabelList.add(new JLabel("WON")); // won name for blue 13
         jLabelList.add(new JLabel("0")); // won score for blue 14
         jLabelList.add(new JLabel("WON")); // won name for red 15
         jLabelList.add(new JLabel("0")); // won score for red 16
-
-
-        // listeners.TKDKeyListener tkdKeyListener = new listeners.TKDKeyListener(jLabelList);
-        mainWindow.addKeyListener(this);
-        mainWindow.requestFocusInWindow();
+*/
     }
-
-    private void addPropertyChange() {
-        jLabelList.get(12).addPropertyChangeListener("text", new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if ("text".equals(evt.getPropertyName())) {
-
-                    // Perform actions based on the new text value
-                }
-            }
-        });
-    }
-
 
 
     private void setChronometerTimes() {
 
-        String matchTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del round", TDKScoreUtils.TIME_REGEX);
-        String breakTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso", TDKScoreUtils.TIME_REGEX);
+        String matchTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del round", TDKScoreUtils.TIME_REGEX, "02:00");
+        String breakTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso", TDKScoreUtils.TIME_REGEX, "01:00");
         jLabelList.get(12).setText(matchTime);
         chronometer = new Chronometer(jLabelList.get(12), matchTime, breakTime);
     }
@@ -180,7 +194,7 @@ public class Board implements KeyListener {
     }
 
     private void setAllVisible() {
-        TDKMouseListener tdkMouseListener = new TDKMouseListener();
+        TDKMouseListener tdkMouseListener = new TDKMouseListener(chronometer);
         TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList,chronometer);
         jLabelList.forEach(x -> {
             x.setVisible(true);
@@ -202,8 +216,9 @@ public class Board implements KeyListener {
         boardBackground.setLayout(null);
         mainWindow.add(boardBackground);
         mainWindow.setVisible(true);
+       mainWindow.addKeyListener(new TKDKeyListener(jLabelList,jLabelTextList,chronometer,widthSeparation,heightLabel,screenSize));
     }
-
+/*
     private void scorePlus(JLabel jLabel, int plus) {
         int currentScore = Integer.parseInt(jLabel.getText()) + plus;
         jLabel.setText(String.valueOf(currentScore));
@@ -254,11 +269,10 @@ public class Board implements KeyListener {
 
                 // Procesar la respuesta del usuario
                 if (confirmDialog == JOptionPane.YES_OPTION) {
-                    mainWindow.dispose();
-                    initializeComponents();
-                    setFrame();
-                    setAllVisible();
-                    alignLabels();
+                    for(int i=0;i<jLabelList.size();i++){
+                        jLabelList.get(i).setText(jLabelTextList.get(i));
+                    }
+                    jLabelList.get(12).setText(chronometer.getMatchTime());
                 }
                 break;
             case KeyEvent.VK_ENTER:
@@ -273,4 +287,6 @@ public class Board implements KeyListener {
     public void keyReleased(KeyEvent e) {
 
     }
+*/
+
 }

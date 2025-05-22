@@ -10,9 +10,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TKDKeyListener implements KeyListener {
-    List<JLabel> jLabelList;
-    public TKDKeyListener(List<JLabel> jLabelList) {
-        this.jLabelList=jLabelList;
+    private List<JLabel> jLabelList;
+    private List<String> jLabelTextList;
+    private Chronometer chronometer;
+    private int widthSeparation;
+    private int heightLabel;
+    private Dimension screenSize;
+
+    public TKDKeyListener(List<JLabel> jLabelList, List<String> jLabelTextList, Chronometer chronometer, int widthSeparation, int heightLabel, Dimension screenSize) {
+        this.jLabelList = jLabelList;
+        this.jLabelTextList = jLabelTextList;
+        this.chronometer = chronometer;
+        this.widthSeparation = widthSeparation;
+        this.heightLabel = heightLabel;
+        this.screenSize = screenSize;
     }
 
     @Override
@@ -23,44 +34,50 @@ public class TKDKeyListener implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyChar();
-        switch (keyCode){
+        switch (keyCode) {
             case '1':
-                scorePlus(jLabelList.get(1),1);
-            break;
+                scorePlus(jLabelList.get(1), 1);
+                break;
             case '3':
-                scorePlus(jLabelList.get(5),1);
+                scorePlus(jLabelList.get(5), 1);
                 break;
             case '4':
-                scorePlus(jLabelList.get(1),2);
+                scorePlus(jLabelList.get(1), 2);
                 break;
             case '6':
-                scorePlus(jLabelList.get(5),2);
+                scorePlus(jLabelList.get(5), 2);
                 break;
             case '7':
-                scorePlus(jLabelList.get(1),3);
+                scorePlus(jLabelList.get(1), 3);
                 break;
             case '9':
-                scorePlus(jLabelList.get(5),3);
+                scorePlus(jLabelList.get(5), 3);
                 break;
             case '-':
-                scorePlus(jLabelList.get(3),1);
-                scorePlus(jLabelList.get(5),1);
+                scorePlus(jLabelList.get(5), 1);
+                scorePlus(jLabelList.get(3), 1);
                 break;
             case '+':
-                scorePlus(jLabelList.get(7),1);
-                scorePlus(jLabelList.get(1),1);
+                scorePlus(jLabelList.get(1), 1);
+                scorePlus(jLabelList.get(7), 1);
                 break;
             case '/':
                 int confirmDialog = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas continuar?", "Confirmación", JOptionPane.YES_NO_OPTION);
 
                 // Procesar la respuesta del usuario
                 if (confirmDialog == JOptionPane.YES_OPTION) {
-                    initializeComponents();
-                    // Realizar la acción que el usuario ha confirmado
+                    for(int i=0;i<jLabelList.size();i++){
+                        jLabelList.get(i).setText(jLabelTextList.get(i));
+                    }
+                    jLabelList.get(12).setText(chronometer.getMatchTime());
                 }
                 break;
-        }
+            case KeyEvent.VK_ENTER:
+                chronometer.startStopTimer();
+                break;
 
+
+        }
     }
 
     @Override
@@ -68,31 +85,13 @@ public class TKDKeyListener implements KeyListener {
 
     }
 
-    private void scorePlus(JLabel jLabel,int plus){
-        int currentScore=Integer.parseInt(jLabel.getText())+plus;
+    private void scorePlus(JLabel jLabel, int plus) {
+        int currentScore = Integer.parseInt(jLabel.getText()) + plus;
         jLabel.setText(String.valueOf(currentScore));
-        if(currentScore>10){
-            jLabel.setFont(new Font(jLabel.getFont().getFontName(),jLabel.getFont().getStyle(), TDKScoreUtils.findFontSizeByJLabelSize(jLabel.getFont(),jLabel)));
+        if (currentScore > 9) {
+            int widthSeparationScore = (widthSeparation / 3);
+            jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 3)));
+            jLabel.setFont(new Font(jLabel.getFont().getFontName(), jLabel.getFont().getStyle(), TDKScoreUtils.findFontSizeByJLabelSize(jLabel.getFont(), jLabel)));
         }
-    }
-
-    private void initializeComponents(){
-        jLabelList = new ArrayList<>();
-
-        jLabelList.add(new JLabel("Insert Blue Name")); //blue contestant name 0
-        jLabelList.add(new JLabel("0")); //blue contestant score 1
-        jLabelList.add(new JLabel("GAM-JEOM")); //blue contestant faults name 2
-        jLabelList.add(new JLabel("0")); //blue contestant faults Score 3
-        jLabelList.add(new JLabel("Insert Red Name"));  //red contestant name 4
-        jLabelList.add(new JLabel("0")); //red contestant score 5
-        jLabelList.add(new JLabel("GAM-JEOM")); //red contestant faults name 6
-        jLabelList.add(new JLabel("0")); //red contestant faults Score 7
-        jLabelList.add(new JLabel("Match")); //8
-        jLabelList.add(new JLabel("1")); //9
-        jLabelList.add(new JLabel("Round"));  //10
-        jLabelList.add(new JLabel("1")); //11
-        jLabelList.add(new JLabel("0")); // round time 12
-
-
     }
 }

@@ -29,7 +29,7 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
                     case "timer":
                         String timeout = (String) evt.getNewValue();
                         if ("0:00".equals(timeout)) {
-                            if (!Chronometer.IS_BREAK_TIME) {
+                            if (!chronometer.isIS_BREAK_TIME()) {
                                 //validates that red wins
                                 if (Integer.parseInt(jLabelList.get(1).getText()) < Integer.parseInt(jLabelList.get(5).getText())) {
                                     setRoundWinner(false);
@@ -46,48 +46,30 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
                         }
                         break;
                     case "blueWin":
-                        if(sourceLabel.getText().equals("2")){
-                            chronometer.restartTime(chronometer.getMatchTime());
-                            Chronometer.IS_BREAK_TIME=false;
-                            jLabelList.get(9).setText(String.valueOf(Integer.parseInt(jLabelList.get(9).getText())+1));
-                            jLabelList.get(11).setText("1");
-                            jLabelList.get(14).setText("0");
-                            restoreScore();
-                            JOptionPane.showMessageDialog(null, "Gano azul");
-
-                        }
+                        endScore(sourceLabel,true);
                         break;
                     case "redWin":
-                        if(sourceLabel.getText().equals("2")){
-                            chronometer.restartTime(chronometer.getMatchTime());
-                            Chronometer.IS_BREAK_TIME=false;
-                            jLabelList.get(9).setText(String.valueOf(Integer.parseInt(jLabelList.get(9).getText())+1));
-                            jLabelList.get(11).setText("1");
-                            jLabelList.get(14).setText("0");
-                            restoreScore();
-                            JOptionPane.showMessageDialog(null, "Gano rojo");
-                        }
+                        endScore(sourceLabel,false);
                         break;
                     case "blueGam":
-                        if(sourceLabel.getText().equals("5")){
-                            chronometer.restartTime(chronometer.getBreakTime());
-                            Chronometer.IS_BREAK_TIME=true;
-                            sourceLabel.setText("0");
-                            setRoundWinner(false);
-                        }
+                        wonByGam(sourceLabel,false);
                         break;
                     case "redGam":
-                        if(sourceLabel.getText().equals("5")){
-                            chronometer.restartTime(chronometer.getBreakTime());
-                            Chronometer.IS_BREAK_TIME=true;
-                            sourceLabel.setText("0");
-                            setRoundWinner(true);
-                        }
+                        wonByGam(sourceLabel,true);
                         break;
                 }
             }
         }
 
+    }
+
+    private void wonByGam(JLabel sourceLabel, boolean isBlueWinner){
+        if(sourceLabel.getText().equals("5")){
+            chronometer.restartTime(chronometer.getBreakTime());
+            chronometer.setIsBreakTime(true);
+            sourceLabel.setText("0");
+            setRoundWinner(isBlueWinner);
+        }
     }
 
     private void setRoundWinner( boolean isBlueWinner) {
@@ -101,12 +83,55 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
         roundLoserLabel.setText(loserLabel.getText());
     }
 
+    private void endScore(JLabel sourceLabel, boolean isBlueWinner){
+        if(sourceLabel.getText().equals("2")){
+            chronometer.restartTime(chronometer.getMatchTime()); //restart chronometer
+            chronometer.setIsBreakTime(false); //avoid break time
+            jLabelList.get(9).setText(String.valueOf(Integer.parseInt(jLabelList.get(9).getText())+1)); //increase match time
+            jLabelList.get(11).setText("1"); // reset round number
+            jLabelList.get(14).setText("0"); //restart won score for blue
+            jLabelList.get(16).setText("0"); //restart won score for red
+            restoreScore();
+
+            showWinnerMessage(isBlueWinner);
+
+
+
+        }
+    }
+
+    private void showWinnerMessage(Boolean isBlueWinner){
+
+        JFrame endWinner = new JFrame();
+        endWinner.setAlwaysOnTop(false);
+        endWinner.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        endWinner.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        endWinner.setResizable(false);
+        endWinner.setMinimumSize(new Dimension(200, 200));
+        endWinner.setLocationRelativeTo(null);
+        endWinner.setLayout(new BorderLayout());
+        endWinner.getContentPane().setBackground(isBlueWinner?Color.BLUE:Color.RED);
+
+
+        Font font = jLabelList.get(0).getFont();
+        JLabel winnerTex = new JLabel("WINNER");
+        winnerTex.setFont(new Font(font.getFontName(),font.getStyle(),300));
+        winnerTex.setHorizontalAlignment(JLabel.CENTER);
+        winnerTex.setVerticalAlignment(JLabel.CENTER);
+        winnerTex.setForeground(Color.YELLOW);
+        winnerTex.setVisible(true);
+        endWinner.setVisible(true);
+        endWinner.add(winnerTex,BorderLayout.CENTER);
+    }
 
     private void restoreScore() {
         jLabelList.get(1).setBackground(TDKScoreUtils.BLUE_COLOR);
         jLabelList.get(5).setBackground(TDKScoreUtils.RED_COLOR);
         jLabelList.get(1).setText("0");
         jLabelList.get(5).setText("0");
+        // restart gam jeon
+        jLabelList.get(3).setText("0");
+        jLabelList.get(7).setText("0");
     }
     private void nextRound(){
         int currentRound=Integer.parseInt(jLabelList.get(11).getText())+1;
