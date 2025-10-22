@@ -5,9 +5,14 @@ import utils.TDKScoreUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+
 
 public class TKDScorePropertyChangeListener implements PropertyChangeListener {
     List<JLabel> jLabelList;
@@ -28,8 +33,10 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
                 switch (sourceLabel.getName()) {
                     case "timer":
                         String timeout = (String) evt.getNewValue();
-                        if ("0:00".equals(timeout)) {
+
+                        if ("0:00".equals(timeout) || "00:00".equals(timeout)) {
                             if (!chronometer.isIS_BREAK_TIME()) {
+
                                 //validates that red wins
                                 if (Integer.parseInt(jLabelList.get(1).getText()) < Integer.parseInt(jLabelList.get(5).getText())) {
                                     setRoundWinner(false);
@@ -85,18 +92,16 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
 
     private void endScore(JLabel sourceLabel, boolean isBlueWinner){
         if(sourceLabel.getText().equals("2")){
+            int result = JOptionPane.showOptionDialog(null, "¿Quien es el ganador final?", "Ganador", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"AZUL", "ROJO"}, "AZUL");
+            isBlueWinner=result==JOptionPane.YES_OPTION;
             chronometer.restartTime(chronometer.getMatchTime()); //restart chronometer
             chronometer.setIsBreakTime(false); //avoid break time
             jLabelList.get(9).setText(String.valueOf(Integer.parseInt(jLabelList.get(9).getText())+1)); //increase match time
             jLabelList.get(11).setText("1"); // reset round number
             jLabelList.get(14).setText("0"); //restart won score for blue
             jLabelList.get(16).setText("0"); //restart won score for red
-            restoreScore();
 
             showWinnerMessage(isBlueWinner);
-
-
-
         }
     }
 
@@ -112,6 +117,74 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
         endWinner.setLayout(new BorderLayout());
         endWinner.getContentPane().setBackground(isBlueWinner?Color.BLUE:Color.RED);
 
+        endWinner.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int keyCode = e.getKeyChar();
+                switch (keyCode) {
+                    case '.':
+                    endWinner.dispose();
+                        break;
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+
+            });
+        endWinner.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                restoreScore();
+            jLabelList.get(14).setText("0"); //restart won score for blue
+            jLabelList.get(16).setText("0"); //restart won score for red
+            chronometer.restartTime(chronometer.getMatchTime());
+            jLabelList.get(17).setBackground(Color.BLACK);
+                chronometer.setIsBreakTime(false);
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                restoreScore();
+                jLabelList.get(14).setText("0"); //restart won score for blue
+                jLabelList.get(16).setText("0"); //restart won score for red
+                chronometer.restartTime(chronometer.getMatchTime());
+                jLabelList.get(17).setBackground(Color.BLACK);
+                chronometer.setIsBreakTime(false);
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
+            }
+        });
 
         Font font = jLabelList.get(0).getFont();
         JLabel winnerTex = new JLabel("WINNER");
@@ -134,7 +207,11 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
         jLabelList.get(7).setText("0");
     }
     private void nextRound(){
-        int currentRound=Integer.parseInt(jLabelList.get(11).getText())+1;
+        int currentRound = Integer.parseInt(jLabelList.get(11).getText()) + 1;
+        if(Integer.parseInt(jLabelList.get(14).getText())==0
+                && Integer.parseInt(jLabelList.get(16).getText())==0) {
+            currentRound=1;
+        }
         jLabelList.get(11).setText(String.valueOf(currentRound));
 
     }

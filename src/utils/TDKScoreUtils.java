@@ -10,6 +10,7 @@ public class TDKScoreUtils {
     public static final String NUMERIC_REGEX ="^[0-9]+$";
     public static final String TIME_REGEX ="(0?[0-9]|[1-5][0-9]):(0[0-9]|[1-5][0-9])";
     public static final String INPUT_MESSAGE_NAME ="Por favor escriba el Nombre ";
+    public static final String INPUT_MESSAGE_NEW_SCORE ="Por favor escriba el nuevo marcador ";
     public static final String INPUT_MESSAGE_NUMERIC ="Por favor escriba el nuevo Valor ";
     public static final String INPUT_MESSAGE_TIME ="Por favor escriba el tiempo en formato mm:ss";
     public static final String TITTLE_MESSAGE ="Ingrese un Valor";
