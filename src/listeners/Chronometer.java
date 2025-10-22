@@ -1,6 +1,7 @@
 package listeners;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Chronometer {
     private int minutes;
@@ -9,11 +10,13 @@ public class Chronometer {
     private String breakTime;
     private boolean IS_BREAK_TIME;
     private JLabel timerLabel;
+    private JLabel breakLabel;
 
     private final Timer timer;
 
-    public Chronometer(JLabel timerLabel, String matchTime, String breackTime) {
+    public Chronometer(JLabel timerLabel, String matchTime, String breackTime, JLabel breakLabel) {
         this.timerLabel = timerLabel;
+        this.breakLabel=breakLabel;
         this.matchTime = matchTime;
         this.breakTime = breackTime;
         this.minutes = Integer.parseInt(timerLabel.getText().split(":")[0]);
@@ -29,16 +32,25 @@ public class Chronometer {
     public void updateTime() {
         seconds--;
 
-        if (minutes == 0 && seconds < 0) {
+        if (minutes <= 0 && seconds <= 0) {
 
             if (!IS_BREAK_TIME) {
+                updateLabel();
                 restartTime(breakTime);
                 timer.start();
                 IS_BREAK_TIME = true;
+                breakLabel.setOpaque(true);
+                breakLabel.setForeground(Color.BLACK);
+                breakLabel.setBackground(Color.YELLOW);
+
             } else {
                 timer.stop();
-                restartTime(matchTime);
+                updateLabel();
                 IS_BREAK_TIME = false;
+                breakLabel.setOpaque(false);
+                breakLabel.setForeground(Color.BLACK);
+                breakLabel.setBackground(Color.BLACK);
+                restartTime(matchTime);
             }
         }
         if (seconds < 0) {
@@ -57,6 +69,11 @@ public class Chronometer {
             timer.stop();
         } else {
             timer.start();
+        }
+    }
+    public void stopTime(){
+        if (timer.isRunning()) {
+            timer.stop();
         }
     }
 
@@ -92,5 +109,9 @@ public class Chronometer {
 
     public boolean isIS_BREAK_TIME() {
         return IS_BREAK_TIME;
+    }
+
+    public boolean isRunning(){
+        return timer.isRunning();
     }
 }

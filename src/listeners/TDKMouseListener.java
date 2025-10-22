@@ -6,13 +6,16 @@ import utils.TDKScoreUtils;
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 
 public class TDKMouseListener implements MouseListener {
 
     private Chronometer chronometer;
+    private List<JLabel> jLabelList;
 
-    public TDKMouseListener(Chronometer chronometer) {
+    public TDKMouseListener(Chronometer chronometer, List<JLabel> jLabelList) {
         this.chronometer = chronometer;
+        this.jLabelList = jLabelList;
     }
 
     @Override
@@ -28,10 +31,18 @@ public class TDKMouseListener implements MouseListener {
                     case "redName":
                         label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NAME, TDKScoreUtils.NAME_REGEX, label.getText()));
                         break;
-                    case "match":
+
+                    case "blueScore":
+                    case "redScore":
+                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NEW_SCORE, TDKScoreUtils.NUMERIC_REGEX, label.getText()));
+                        break;
+
                     case "round":
-                    case "blueGam":
-                    case "redGam":
+                        String blueWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de azul", TDKScoreUtils.NUMERIC_REGEX, "0");
+                        String redWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de rojo", TDKScoreUtils.NUMERIC_REGEX, "0");
+                        jLabelList.get(14).setText(blueWins);
+                        jLabelList.get(16).setText(redWins);
+                    case "match":
                         label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC, TDKScoreUtils.NUMERIC_REGEX, label.getText()));
                         break;
                     case "timer":
@@ -39,7 +50,6 @@ public class TDKMouseListener implements MouseListener {
                         chronometer.setBreakTime(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso", TDKScoreUtils.TIME_REGEX, chronometer.getBreakTime()));
                         chronometer.restartTime(chronometer.getMatchTime());
                         chronometer.setIsBreakTime(false);
-                        label.setText(TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME, TDKScoreUtils.TIME_REGEX, chronometer.getMatchTime()));
                         break;
                 }
             }
