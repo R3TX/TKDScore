@@ -7,10 +7,10 @@ import java.awt.*;
 
 
 public class PanelGridTime extends JPanel {
-    JLabel matchScore;
-    JLabel timeScore;
-    JLabel roundScore;
-    JLabel breackName;
+    private JLabel matchScore;
+    private JLabel timeScore;
+    private JLabel roundScore;
+    private JLabel breackName;
 
     public PanelGridTime() {
         setLayout(new GridBagLayout());
