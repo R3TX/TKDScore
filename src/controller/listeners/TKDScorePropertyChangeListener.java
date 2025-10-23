@@ -1,4 +1,4 @@
-package listeners;
+package controller.listeners;
 
 import org.apache.commons.lang3.StringUtils;
 import utils.TDKScoreUtils;
@@ -16,7 +16,7 @@ import java.util.List;
 
 public class TKDScorePropertyChangeListener implements PropertyChangeListener {
     List<JLabel> jLabelList;
-    private Chronometer chronometer;
+    private final Chronometer chronometer;
 
 
     public TKDScorePropertyChangeListener(List<JLabel> jLabelList, Chronometer chronometer) {

@@ -1,4 +1,4 @@
-package listeners;
+package controller.listeners;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,8 +9,8 @@ public class Chronometer {
     private String matchTime;
     private String breakTime;
     private boolean IS_BREAK_TIME;
-    private JLabel timerLabel;
-    private JLabel breakLabel;
+    private final JLabel timerLabel;
+    private final JLabel breakLabel;
 
     private final Timer timer;
 
