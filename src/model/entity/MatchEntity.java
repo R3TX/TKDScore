@@ -14,7 +14,7 @@ public class MatchEntity {
         this.redCompetitorId = redCompetitorId;
         this.blueCompetitorId = blueCompetitorId;
         this.matchWinnerId = matchWinnerId;
-        this.matchNumber = matchWinnerId;
+        this.matchNumber = matchNumber;
     }
 
     // Getters
