@@ -1,4 +1,9 @@
-import listeners.*;
+package view;
+
+import controller.listeners.Chronometer;
+import controller.listeners.TDKMouseListener;
+import controller.listeners.TKDKeyListener;
+import controller.listeners.TKDScorePropertyChangeListener;
 import utils.TDKScoreUtils;
 
 import javax.swing.*;
@@ -24,6 +29,9 @@ public class Board {
     private BoardBackground boardBackground;
 
     public Board() {
+
+        JFrameColumns columns = new JFrameColumns();
+        /*
         initializeComponents();
         setChronometerTimes(); // dont move
         screenSize(); //debe ir antes del listener
@@ -31,6 +39,8 @@ public class Board {
         setAllVisible();
         alignLabels();
         setLabelsName();
+
+         */
     }
 
     private void screenSize() {
@@ -41,7 +51,7 @@ public class Board {
         jLabelList.get(0).setFont(new Font(currentFont.getFontName(), currentFont.getStyle(), defaultFontSize));
 
         heightLabel = (int) jLabelList.get(0).getPreferredSize().getHeight();
-        jLabelList.get(0).setBounds(0,0,widthSeparation * 3, heightLabel);
+        jLabelList.get(0).setBounds(0, 0, widthSeparation * 3, heightLabel);
         //defaultFontSize = TDKScoreUtils.findFontSizeByJLabelSize(currentFont, jLabelList.get(0));
     }
 
@@ -65,23 +75,23 @@ public class Board {
         jLabelList.get(6).setForeground(Color.WHITE);
         jLabelList.get(7).setForeground(Color.WHITE);
         //Configuration for score labels
-        int widthSeparationScore = (int) (boardBackgroundWidth / 3);
+        int widthSeparationScore = (boardBackgroundWidth / 3);
         jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, boardBackgroundWidth * 2, (int) (screenSize.getHeight() - (heightLabel * 3)));
         TDKScoreUtils.findFontSizeByJLabelSize(currentFont, jLabelList.get(1));
-        alignLabel(jLabelList.get(5), xRojo + widthSeparationScore*2, heightLabel, boardBackgroundWidth * 2, (int) (screenSize.getHeight() - (heightLabel * 3)), jLabelList.get(1).getFont().getSize()); // Puntuación rojo
+        alignLabel(jLabelList.get(5), xRojo + widthSeparationScore * 2, heightLabel, boardBackgroundWidth * 2, (int) (screenSize.getHeight() - (heightLabel * 3)), jLabelList.get(1).getFont().getSize()); // Puntuación rojo
         jLabelList.get(1).setForeground(Color.WHITE);
         jLabelList.get(5).setForeground(Color.WHITE);
 
-        setScoreLabelBackground( TDKScoreUtils.BLUE_COLOR, jLabelList.get(1));
+        setScoreLabelBackground(TDKScoreUtils.BLUE_COLOR, jLabelList.get(1));
         setScoreLabelBackground(TDKScoreUtils.RED_COLOR, jLabelList.get(5));
 
         //winnings labels
         FontMetrics fontMetrics = jLabelList.get(13).getFontMetrics(currentFont);
-        alignLabel(jLabelList.get(13), widthSeparationScore * 7, heightLabel, boardBackgroundWidth/2, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(13), widthSeparationScore * 7, heightLabel, boardBackgroundWidth / 2, heightLabel, defaultFontSize);
         TDKScoreUtils.findFontSizeByJLabelSize(currentFont, jLabelList.get(13));
-        jLabelList.get(13).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),jLabelList.get(13).getFont().getSize()/2));
-        alignLabel(jLabelList.get(14), widthSeparationScore * 7, heightLabel * 2,fontMetrics.charWidth('W') * 12 , heightLabel, defaultFontSize);
-        alignLabel(jLabelList.get(15), boardBackgroundWidth * 4, heightLabel, boardBackgroundWidth/2, heightLabel, jLabelList.get(13).getFont().getSize());
+        jLabelList.get(13).setFont(new Font(currentFont.getFontName(), currentFont.getStyle(), jLabelList.get(13).getFont().getSize() / 2));
+        alignLabel(jLabelList.get(14), widthSeparationScore * 7, heightLabel * 2, fontMetrics.charWidth('W') * 12, heightLabel, defaultFontSize);
+        alignLabel(jLabelList.get(15), boardBackgroundWidth * 4, heightLabel, boardBackgroundWidth / 2, heightLabel, jLabelList.get(13).getFont().getSize());
         alignLabel(jLabelList.get(16), boardBackgroundWidth * 4, heightLabel * 2, fontMetrics.charWidth('W') * 12, heightLabel, defaultFontSize);
         jLabelList.get(13).setForeground(Color.WHITE);
         jLabelList.get(14).setForeground(Color.WHITE);
@@ -89,16 +99,16 @@ public class Board {
         jLabelList.get(16).setForeground(Color.WHITE);
         //black line labels/*
         int xBlack = boardBackgroundWidth * 3;
-        int screenSize = boardBackground.getHeight()/heightLabel;
-        int screenSizeSeparation = boardBackground.getHeight()/screenSize;
+        int screenSize = boardBackground.getHeight() / heightLabel;
+        int screenSizeSeparation = boardBackground.getHeight() / screenSize;
         alignLabel(jLabelList.get(8), xBlack, screenSizeSeparation, boardBackgroundWidth, heightLabel, defaultFontSize); //match
         alignLabel(jLabelList.get(9), xBlack, screenSizeSeparation * 2, boardBackgroundWidth, heightLabel, defaultFontSize); // match number
-        alignLabel(jLabelList.get(10), xBlack,screenSizeSeparation*(screenSize-3), boardBackgroundWidth, heightLabel, defaultFontSize); //round
-        alignLabel(jLabelList.get(11), xBlack,screenSizeSeparation*(screenSize-2), boardBackgroundWidth, heightLabel, defaultFontSize); //round number
+        alignLabel(jLabelList.get(10), xBlack, screenSizeSeparation * (screenSize - 3), boardBackgroundWidth, heightLabel, defaultFontSize); //round
+        alignLabel(jLabelList.get(11), xBlack, screenSizeSeparation * (screenSize - 2), boardBackgroundWidth, heightLabel, defaultFontSize); //round number
 
-        jLabelList.get(12).setBounds(xBlack, screenSizeSeparation * (screenSize/2), boardBackgroundWidth, heightLabel*3);
-        jLabelList.get(12).setFont(new Font(currentFont.getFontName(),currentFont.getStyle(),TDKScoreUtils.findFontSizeByJLabelSize(currentFont,jLabelList.get(12))));
-        alignLabel(jLabelList.get(17), xBlack, screenSizeSeparation *(screenSize/2 + 1)+heightLabel*2 , boardBackgroundWidth, heightLabel, jLabelList.get(12).getFont().getSize()); //break label
+        jLabelList.get(12).setBounds(xBlack, screenSizeSeparation * (screenSize / 2), boardBackgroundWidth, heightLabel * 3);
+        jLabelList.get(12).setFont(new Font(currentFont.getFontName(), currentFont.getStyle(), TDKScoreUtils.findFontSizeByJLabelSize(currentFont, jLabelList.get(12))));
+        alignLabel(jLabelList.get(17), xBlack, screenSizeSeparation * (screenSize / 2 + 1) + heightLabel * 2, boardBackgroundWidth, heightLabel, jLabelList.get(12).getFont().getSize()); //break label
 
         for (int i = 8; i < 13; i++) {
             jLabelList.get(i).setForeground(Color.WHITE);
@@ -137,7 +147,7 @@ public class Board {
         mainWindow.requestFocusInWindow();
     }
 
-    private void createLabelTextList(){
+    private void createLabelTextList() {
         jLabelTextList.add("Nombre Azul"); //blue contestant name 0
         jLabelTextList.add("0"); //blue contestant score 1
         jLabelTextList.add("GAM-JEOM"); //blue contestant faults name 2
@@ -150,7 +160,7 @@ public class Board {
         jLabelTextList.add("1"); //9
         jLabelTextList.add("Round");  //10
         jLabelTextList.add("1"); //11
-        jLabelTextList.add(Objects.isNull(chronometer)?"02:00":chronometer.getMatchTime()); // round time 12
+        jLabelTextList.add(Objects.isNull(chronometer) ? "02:00" : chronometer.getMatchTime()); // round time 12
         jLabelTextList.add("WINNER"); // won name for blue 13
         jLabelTextList.add("0"); // won score for blue 14
         jLabelTextList.add("WINNER"); // won name for red 15
@@ -158,7 +168,7 @@ public class Board {
         jLabelTextList.add("Break"); // won score for red 17
     }
 
-    private void createLabelsList(){
+    private void createLabelsList() {
         for (String s : jLabelTextList) {
             jLabelList.add(new JLabel(s));
         }
@@ -189,8 +199,8 @@ public class Board {
     }
 
     private void setAllVisible() {
-        TDKMouseListener tdkMouseListener = new TDKMouseListener(chronometer,jLabelList );
-        TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList,chronometer);
+        TDKMouseListener tdkMouseListener = new TDKMouseListener(chronometer, jLabelList);
+        TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList, chronometer);
         jLabelList.forEach(x -> {
             x.setVisible(true);
             x.setForeground(Color.BLACK);
@@ -210,7 +220,7 @@ public class Board {
         boardBackground.setLayout(null);
         mainWindow.add(boardBackground);
         mainWindow.setVisible(true);
-        mainWindow.addKeyListener(new TKDKeyListener(jLabelList,jLabelTextList,chronometer,widthSeparation,heightLabel,Toolkit.getDefaultToolkit().getScreenSize()));
+        mainWindow.addKeyListener(new TKDKeyListener(jLabelList, jLabelTextList, chronometer, widthSeparation, heightLabel, Toolkit.getDefaultToolkit().getScreenSize()));
     }
 
 }

@@ -1,4 +1,4 @@
-package listeners;
+package controller.listeners;
 
 import org.apache.commons.lang3.StringUtils;
 import utils.TDKScoreUtils;
@@ -10,8 +10,8 @@ import java.util.List;
 
 public class TDKMouseListener implements MouseListener {
 
-    private Chronometer chronometer;
-    private List<JLabel> jLabelList;
+    private final Chronometer chronometer;
+    private final List<JLabel> jLabelList;
 
     public TDKMouseListener(Chronometer chronometer, List<JLabel> jLabelList) {
         this.chronometer = chronometer;

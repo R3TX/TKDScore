@@ -1,4 +1,4 @@
-package listeners;
+package controller.listeners;
 
 import utils.TDKScoreUtils;
 
@@ -9,13 +9,12 @@ import java.awt.event.KeyListener;
 import java.util.List;
 
 public class TKDKeyListener implements KeyListener {
-    private List<JLabel> jLabelList;
-    private List<String> jLabelTextList;
-    private Chronometer chronometer;
-    private int widthSeparation;
-    private int heightLabel;
-    private Dimension screenSize;
-    private static final int DOUBLE_PRESS_THRESHOLD_MS = 100;
+    private final List<JLabel> jLabelList;
+    private final List<String> jLabelTextList;
+    private final Chronometer chronometer;
+    private final int widthSeparation;
+    private final int heightLabel;
+    private final Dimension screenSize;
 
     public TKDKeyListener(List<JLabel> jLabelList, List<String> jLabelTextList, Chronometer chronometer, int widthSeparation, int heightLabel, Dimension screenSize) {
         this.jLabelList = jLabelList;
