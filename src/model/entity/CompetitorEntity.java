@@ -7,8 +7,7 @@ public class CompetitorEntity {
 
     public CompetitorEntity() {}
 
-    public CompetitorEntity(int uId, String name, String assignedColor) {
-        this.uId = uId;
+    public CompetitorEntity(String name, String assignedColor) {
         this.name = name;
         this.assignedColor = assignedColor;
     }
