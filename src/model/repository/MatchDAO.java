@@ -13,7 +13,12 @@ public class MatchDAO {
     private static final String TABLE_NAME = "MATCH_ENTITY";
     private static final String INSERT_SQL =
             "INSERT INTO " + TABLE_NAME +
-                    " (MATCH_NUMBER, RED_COMPETITOR_ID, BLUE_COMPETITOR_ID, MATCH_WINNER_ID) VALUES (?, ?, ?, ?)";
+                    " (MATCH_NUMBER, RED_COMPETITOR_ID, BLUE_COMPETITOR_ID, MATCH_WINNER_ID,RED_WON_ROUNDS,BLUE_WON_ROUNDS) VALUES (?, ?, ?, ?,?,?)";
+
+    private static final String UPDATE_SQL =
+            "UPDATE " + TABLE_NAME +
+                    " SET MATCH_NUMBER = ?, RED_COMPETITOR_ID = ?, BLUE_COMPETITOR_ID = ?, MATCH_WINNER_ID = ?, RED_WON_ROUNDS = ?, BLUE_WON_ROUNDS = ?" +
+                    " WHERE MATCH_ID = ? ";
 
     public MatchDAO(CompetitorDAO competitorDAO) {
         this.competitorDAO = competitorDAO;
@@ -48,6 +53,36 @@ public class MatchDAO {
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return match;
+    }
+
+    public MatchEntity update(MatchEntity match) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
+
+            // 1. Asignar los valores del SET (Parámetros 1 a 4)
+            stmt.setInt(1, match.getMatchNumber());
+            stmt.setInt(2, match.getRedCompetitor().getuId());
+
+            stmt.setInt(3, match.getBlueCompetitor().getuId());
+
+            if (match.getMatchWinner() != null) {
+                stmt.setInt(4, match.getMatchWinner().getuId());
+            } else {
+                stmt.setNull(4, Types.INTEGER);
+            }
+            stmt.setInt(5, match.getRedWonRounds());
+            stmt.setInt(6, match.getBlueWonRounds());
+            stmt.setInt(7, match.getuId());
+
+            // 3. Ejecutar la actualización
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("updated match: " + match.getuId());
+
+        } catch (SQLException e) {
+            System.err.println("error trying to update match: " + match.getuId());
             e.printStackTrace();
         }
         return match;

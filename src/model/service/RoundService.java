@@ -75,7 +75,10 @@ public class RoundService {
         round.setRoundWinner(winner);
 
         // Assuming roundDAO.save() handles the update
-        return roundDAO.save(round);
+        return roundDAO.update(round);
+    }
+    public RoundEntity updateRound(RoundEntity round){
+        return roundDAO.update(round);
     }
 
     /**

@@ -11,19 +11,10 @@ import java.awt.event.KeyListener;
 import java.util.List;
 
 public class TKDKeyListener implements KeyListener {
-    private final List<JLabel> jLabelList;
-    private final Chronometer chronometer;
-    private final int widthSeparation;
-    private final int heightLabel;
-    private final Dimension screenSize;
+
     private final MatchController matchController;
 
-    public TKDKeyListener(List<JLabel> jLabelList, Chronometer chronometer, int widthSeparation, int heightLabel, Dimension screenSize, MatchController matchController) {
-        this.jLabelList = jLabelList;
-        this.chronometer = chronometer;
-        this.widthSeparation = widthSeparation;
-        this.heightLabel = heightLabel;
-        this.screenSize = screenSize;
+    public TKDKeyListener(MatchController matchController) {
         this.matchController = matchController;
     }
 
