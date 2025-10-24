@@ -1,5 +1,7 @@
 package controller.listeners;
 
+import controller.match.MatchController;
+import model.entity.PlayerColor;
 import org.apache.commons.lang3.StringUtils;
 import utils.TDKScoreUtils;
 
@@ -17,11 +19,13 @@ import java.util.List;
 public class TKDScorePropertyChangeListener implements PropertyChangeListener {
     List<JLabel> jLabelList;
     private final Chronometer chronometer;
+    private final MatchController matchController;
 
 
-    public TKDScorePropertyChangeListener(List<JLabel> jLabelList, Chronometer chronometer) {
+    public TKDScorePropertyChangeListener(List<JLabel> jLabelList, Chronometer chronometer, MatchController matchController) {
         this.jLabelList = jLabelList;
         this.chronometer = chronometer;
+        this.matchController = matchController;
     }
 
     @Override
@@ -30,39 +34,37 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
         if(source instanceof JLabel) {
             JLabel sourceLabel = (JLabel) source;
             if (StringUtils.isNoneEmpty(sourceLabel.getName())) {
+                String newValue = (String) evt.getNewValue();
                 switch (sourceLabel.getName()) {
                     case "timer":
-                        String timeout = (String) evt.getNewValue();
 
-                        if ("0:00".equals(timeout) || "00:00".equals(timeout)) {
-                            if (!chronometer.isIS_BREAK_TIME()) {
-
-                                //validates that red wins
-                                if (Integer.parseInt(jLabelList.get(1).getText()) < Integer.parseInt(jLabelList.get(5).getText())) {
-                                    setRoundWinner(false);
-                                } else if (Integer.parseInt(jLabelList.get(1).getText()) > Integer.parseInt(jLabelList.get(5).getText())) {
-                                    setRoundWinner(true);
-                                } else {
-                                    int result = JOptionPane.showOptionDialog(null, "¿Quien es el ganador?", "Ganador", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"AZUL", "ROJO"}, "AZUL");
-                                    setRoundWinner(result == JOptionPane.OK_OPTION);
-                                }
-                            } else {
-                                restoreScore();
-                                nextRound();
-                            }
+                        if ("0:00".equals(newValue) || "00:00".equals(newValue)) {
+                            matchController.handleTimeOut();
                         }
                         break;
                     case "blueWin":
-                        endScore(sourceLabel,true);
+                        if ("2".equals(newValue)) {
+                            // 📞 Llama al Controller: Azul ganó 2 rondas
+                            matchController.handleMatchWin(PlayerColor.BLUE);
+                        }
                         break;
                     case "redWin":
-                        endScore(sourceLabel,false);
+                        if ("2".equals(newValue)) {
+                            // 📞 Llama al Controller: Azul ganó 2 rondas
+                            matchController.handleMatchWin(PlayerColor.RED);
+                        }
                         break;
                     case "blueGam":
-                        wonByGam(sourceLabel,false);
+                        if ("5".equals(newValue)) {
+                            // 📞 Llama al Controller: Azul tiene 5 faltas. El ganador es ROJO (false)
+                            matchController.handleGamJeomLimit(true);
+                        }
                         break;
                     case "redGam":
-                        wonByGam(sourceLabel,true);
+                        if ("5".equals(newValue)) {
+                            // 📞 Llama al Controller: Rojo tiene 5 faltas. El ganador es AZUL (true)
+                            matchController.handleGamJeomLimit(false);
+                        }
                         break;
                 }
             }

@@ -1,4 +1,5 @@
 package model.service;
+import model.entity.CompetitorEntity;
 import model.entity.MatchEntity;
 import model.repository.CompetitorDAO;
 import model.repository.MatchDAO;
@@ -29,19 +30,42 @@ public class MatchService {
      */
     public MatchEntity createNewMatch(int matchNumber, int redCompetitorId, int blueCompetitorId) {
         // Business Logic: Ensure both competitors exist by checking the CompetitorDAO
-        if (competitorDAO.findById(redCompetitorId).isEmpty() || competitorDAO.findById(blueCompetitorId).isEmpty()) {
-            throw new IllegalArgumentException("One or both competitor IDs are invalid.");
-        }
+        CompetitorEntity redCompetitor = competitorDAO.findById(redCompetitorId)
+                .orElseThrow(() -> new IllegalArgumentException("Red Competitor ID " + redCompetitorId + " is invalid."));
+
+        CompetitorEntity blueCompetitor = competitorDAO.findById(blueCompetitorId)
+                .orElseThrow(() -> new IllegalArgumentException("Blue Competitor ID " + blueCompetitorId + " is invalid."));
 
         // Logic: Create the new entity with initial state
         MatchEntity newMatch = new MatchEntity(
                 0, // DAO will set the matchId
-                redCompetitorId,
-                blueCompetitorId,
+                redCompetitor,
+                blueCompetitor,
                 null, // No winner yet
                 matchNumber
         );
         return matchDAO.save(newMatch);
+    }
+
+    /**
+     * Updates a match between two competitors.
+     * Applies business logic to ensure competitors exist.
+     * @param match the match to update.
+     * @return The newly created MatchEntity.
+     * @throws IllegalArgumentException if a competitor ID is invalid.
+     */
+    public MatchEntity updateMatch(MatchEntity match) {
+        // Business Logic: Ensure both competitors exist by checking the CompetitorDAO
+           if(match.getRedCompetitor()== null) {
+
+               throw new IllegalArgumentException("Red Competitor ID is invalid.");
+           }
+        if(match.getBlueCompetitor()== null) {
+
+            throw new IllegalArgumentException("Blue Competitor ID is invalid.");
+        }
+
+        return matchDAO.save(match);
     }
 
     /**
@@ -57,12 +81,17 @@ public class MatchService {
                 .orElseThrow(() -> new RuntimeException("Match not found with ID: " + matchId));
 
         // Business Logic: Check if the winner is one of the participants
-        if (match.getRedCompetitorId() != winnerId && match.getBlueCompetitorId() != winnerId) {
-            throw new IllegalArgumentException("Winner ID is not a participant in this match.");
-        }
+        CompetitorEntity winner = competitorDAO.findById(winnerId)
+                .orElseThrow(() -> new IllegalArgumentException("Winner ID " + winnerId + " is invalid."));
 
-        match.setMatchWinnerId(winnerId);
-        // Assuming matchDAO.save() handles the update if the ID exists
+        boolean isParticipant = match.getRedCompetitor().getuId() == winnerId ||
+                match.getBlueCompetitor().getuId() == winnerId;
+
+        if (!isParticipant) {
+            throw new IllegalArgumentException("Winner ID " + winnerId + " is not a participant in this match.");
+        }
+        match.setMatchWinner(winner);
+
         return matchDAO.save(match);
     }
 

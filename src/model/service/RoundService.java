@@ -1,5 +1,8 @@
 package model.service;
+import model.entity.CompetitorEntity;
+import model.entity.MatchEntity;
 import model.entity.RoundEntity;
+import model.repository.CompetitorDAO;
 import model.repository.MatchDAO;
 import model.repository.RoundDAO;
 
@@ -9,10 +12,12 @@ public class RoundService {
 
     private final RoundDAO roundDAO;
     private final MatchDAO matchDAO;
+    private final CompetitorDAO competitorDAO;
 
-    public RoundService(RoundDAO roundDAO, MatchDAO matchDAO) {
+    public RoundService(RoundDAO roundDAO, MatchDAO matchDAO, CompetitorDAO competitorDAO) {
         this.roundDAO = roundDAO;
         this.matchDAO = matchDAO;
+        this.competitorDAO = competitorDAO;
     }
 
     /**
@@ -24,7 +29,7 @@ public class RoundService {
      */
     public RoundEntity startNewRound(int matchId, int roundNumber) {
         // Business Logic: Ensure the match exists
-        matchDAO.findById(matchId)
+        MatchEntity parentMatch = matchDAO.findById(matchId)
                 .orElseThrow(() -> new IllegalStateException("Cannot start round. Match not found with ID: " + matchId));
 
         // Logic: Verify round number validity (1, 2, or 3)
@@ -35,7 +40,7 @@ public class RoundService {
         // Logic: Create new entity
         RoundEntity newRound = new RoundEntity(
                 0, // DAO will set the ID
-                matchId,
+                parentMatch,
                 roundNumber,
                 null,
                 0,
@@ -56,10 +61,18 @@ public class RoundService {
         RoundEntity round = roundDAO.findById(roundId)
                 .orElseThrow(() -> new RuntimeException("Round not found with ID: " + roundId));
 
+        CompetitorEntity winner = null;
+
+        // 🚨 CAMBIO 4: Si hay ganador (roundWinnerId no es null), obtenemos el objeto CompetitorEntity.
+        if (roundWinnerId != null) {
+            winner = competitorDAO.findById(roundWinnerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Round Winner ID " + roundWinnerId + " is invalid."));
+        }
+
         // Business Logic: Update scores and winner
         round.setFinalRedScore(redScore);
         round.setFinalBlueScore(blueScore);
-        round.setRoundWinnerId(roundWinnerId);
+        round.setRoundWinner(winner);
 
         // Assuming roundDAO.save() handles the update
         return roundDAO.save(round);

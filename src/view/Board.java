@@ -1,9 +1,16 @@
 package view;
 
 import controller.listeners.Chronometer;
-import controller.listeners.TDKMouseListener;
 import controller.listeners.TKDKeyListener;
-import controller.listeners.TKDScorePropertyChangeListener;
+import controller.match.MatchController;
+import model.repository.CompetitorDAO;
+import model.repository.MatchDAO;
+import model.repository.RoundDAO;
+import model.repository.RoundStatisticsDAO;
+import model.service.CompetitorService;
+import model.service.MatchService;
+import model.service.RoundService;
+import model.service.RoundStatisticsService;
 import utils.TDKScoreUtils;
 
 import javax.swing.*;
@@ -30,7 +37,23 @@ public class Board {
 
     public Board() {
 
-        JFrameColumns columns = new JFrameColumns();
+        // 2. Instanciar la Capa de Acceso a Datos (DAOs)
+        CompetitorDAO competitorDAO = new CompetitorDAO();
+        MatchDAO matchDAO = new MatchDAO(competitorDAO);
+        RoundDAO roundDAO = new RoundDAO(matchDAO,competitorDAO);
+        RoundStatisticsDAO statsDAO = new RoundStatisticsDAO(roundDAO,competitorDAO);
+
+        // 3. Instanciar la Capa de Servicios, inyectando DAOs
+        CompetitorService competitorService = new CompetitorService(competitorDAO);
+        MatchService matchService = new MatchService(matchDAO, competitorDAO);
+        RoundService roundService = new RoundService(roundDAO, matchDAO,competitorDAO);
+        RoundStatisticsService statsService = new RoundStatisticsService(roundDAO, competitorDAO, statsDAO);
+
+        // 4. Instanciar la Capa de Controladores, inyectando Servicios
+        // CompetitorController competitorController = new CompetitorController(competitorService);
+        MatchController matchController = new MatchController(matchService, roundService, statsService,competitorService,chronometer);
+
+        JFrameColumns columns = new JFrameColumns(matchController,chronometer);
         /*
         initializeComponents();
         setChronometerTimes(); // dont move
@@ -199,15 +222,15 @@ public class Board {
     }
 
     private void setAllVisible() {
-        TDKMouseListener tdkMouseListener = new TDKMouseListener(chronometer, jLabelList);
-        TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList, chronometer);
+     //   TDKMouseListener tdkMouseListener = new TDKMouseListener();
+       // TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList, chronometer);
         jLabelList.forEach(x -> {
             x.setVisible(true);
             x.setForeground(Color.BLACK);
             x.setHorizontalAlignment(JLabel.CENTER);
             x.setVerticalAlignment(JLabel.CENTER);
-            x.addMouseListener(tdkMouseListener);
-            x.addPropertyChangeListener(tkdScorePropertyChangeListener);
+        //    x.addMouseListener(tdkMouseListener);
+           // x.addPropertyChangeListener(tkdScorePropertyChangeListener);
             boardBackground.add(x);
         });
     }
@@ -220,7 +243,7 @@ public class Board {
         boardBackground.setLayout(null);
         mainWindow.add(boardBackground);
         mainWindow.setVisible(true);
-        mainWindow.addKeyListener(new TKDKeyListener(jLabelList, jLabelTextList, chronometer, widthSeparation, heightLabel, Toolkit.getDefaultToolkit().getScreenSize()));
+   //     mainWindow.addKeyListener(new TKDKeyListener(jLabelList, chronometer, widthSeparation, heightLabel, Toolkit.getDefaultToolkit().getScreenSize()));
     }
 
 }
