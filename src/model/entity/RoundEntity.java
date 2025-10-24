@@ -2,36 +2,36 @@ package model.entity;
 
 public class RoundEntity {
     private int roundId;
-    private int matchId;
+    private MatchEntity match;
     private int roundNumber;
-    private Integer roundWinnerId; // Use Integer to allow NULL
+    private CompetitorEntity roundWinner; // Use Integer to allow NULL
     private int finalRedScore;
     private int finalBlueScore;
 
     public RoundEntity() {}
 
-    public RoundEntity(int roundId, int matchId, int roundNumber, Integer roundWinnerId, int finalRedScore, int finalBlueScore) {
+    public RoundEntity(int roundId, MatchEntity match, int roundNumber, CompetitorEntity roundWinner, int finalRedScore, int finalBlueScore) {
         this.roundId = roundId;
-        this.matchId = matchId;
+        this.match = match;
         this.roundNumber = roundNumber;
-        this.roundWinnerId = roundWinnerId;
+        this.roundWinner = roundWinner;
         this.finalRedScore = finalRedScore;
         this.finalBlueScore = finalBlueScore;
     }
 
     // Getters
     public int getRoundId() { return roundId; }
-    public int getMatchId() { return matchId; }
+    public MatchEntity getMatch() { return match; }
     public int getRoundNumber() { return roundNumber; }
-    public Integer getRoundWinnerId() { return roundWinnerId; }
+    public CompetitorEntity getRoundWinner() { return roundWinner; }
     public int getFinalRedScore() { return finalRedScore; }
     public int getFinalBlueScore() { return finalBlueScore; }
 
     // Setters
     public void setRoundId(int roundId) { this.roundId = roundId; }
-    public void setMatchId(int matchId) { this.matchId = matchId; }
+    public void setMatch(MatchEntity match) { this.match = match; }
     public void setRoundNumber(int roundNumber) { this.roundNumber = roundNumber; }
-    public void setRoundWinnerId(Integer roundWinnerId) { this.roundWinnerId = roundWinnerId; }
+    public void setRoundWinner(CompetitorEntity roundWinner) { this.roundWinner = roundWinner; }
     public void setFinalRedScore(int finalRedScore) { this.finalRedScore = finalRedScore; }
     public void setFinalBlueScore(int finalBlueScore) { this.finalBlueScore = finalBlueScore; }
 }

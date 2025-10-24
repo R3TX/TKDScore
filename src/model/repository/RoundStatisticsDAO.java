@@ -11,12 +11,20 @@ import java.util.Optional;
 
 public class RoundStatisticsDAO {
 
+    private final RoundDAO roundDAO;
+    private final CompetitorDAO competitorDAO;
+
     private static final String TABLE_NAME = "ROUND_STATISTICS_ENTITY";
     private static final String INSERT_SQL =
             "INSERT INTO " + TABLE_NAME +
                     " (ROUND_ID, COMPETITOR_ID, BASE_SCORE, GAM_JEOM_FOULS, HEAD_KICKS, TOTAL_SCORE) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String SELECT_BY_COMPOSITE_ID_SQL =
             "SELECT * FROM " + TABLE_NAME + " WHERE ROUND_ID = ? AND COMPETITOR_ID = ?";
+
+    public RoundStatisticsDAO(RoundDAO roundDAO, CompetitorDAO competitorDAO) {
+        this.roundDAO = roundDAO;
+        this.competitorDAO = competitorDAO;
+    }
 
     /**
      * Finds RoundStatisticsEntity using the composite key (Round ID and Competitor ID).
@@ -48,8 +56,8 @@ public class RoundStatisticsDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
 
-            stmt.setInt(1, stats.getRoundId());
-            stmt.setInt(2, stats.getCompetitorId());
+            stmt.setInt(1, stats.getRound().getRoundId());
+            stmt.setInt(2, stats.getCompetitor().getuId());
             stmt.setInt(3, stats.getBaseScore());
             stmt.setInt(4, stats.getGamJeomFouls());
             stmt.setInt(5, stats.getHeadKicks());
@@ -68,8 +76,14 @@ public class RoundStatisticsDAO {
 
     private RoundStatisticsEntity mapResultSetToStats(ResultSet rs) throws SQLException {
         RoundStatisticsEntity entity = new RoundStatisticsEntity();
-        entity.setRoundId(rs.getInt("ROUND_ID"));
-        entity.setCompetitorId(rs.getInt("COMPETITOR_ID"));
+        int roundId = rs.getInt("ROUND_ID");
+        int competitorId = rs.getInt("COMPETITOR_ID");
+
+        // Asignar RoundEntity
+        roundDAO.findById(roundId).ifPresent(entity::setRound);
+        // Asignar CompetitorEntity
+        competitorDAO.findById(competitorId).ifPresent(entity::setCompetitor);
+
         entity.setBaseScore(rs.getInt("BASE_SCORE"));
         entity.setGamJeomFouls(rs.getInt("GAM_JEOM_FOULS"));
         entity.setHeadKicks(rs.getInt("HEAD_KICKS"));

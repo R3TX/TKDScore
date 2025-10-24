@@ -48,7 +48,7 @@ public class CompetitorDAO {
 
             try (ResultSet keys = stmt.getGeneratedKeys()) {
                 if (keys.next()) {
-                    competitor.setCompetitorId(keys.getInt(1));
+                    competitor.setuId(keys.getInt(1));
                 }
             }
         } catch (SQLException e) {
@@ -59,7 +59,7 @@ public class CompetitorDAO {
 
     private CompetitorEntity mapResultSetToCompetitor(ResultSet rs) throws SQLException {
         CompetitorEntity entity = new CompetitorEntity();
-        entity.setCompetitorId(rs.getInt("COMPETITOR_ID"));
+        entity.setuId(rs.getInt("COMPETITOR_ID"));
         entity.setName(rs.getString("NAME"));
         entity.setAssignedColor(rs.getString("ASSIGNED_COLOR"));
         return entity;

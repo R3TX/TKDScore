@@ -1,25 +1,25 @@
 package model.entity;
 
 public class CompetitorEntity {
-    private int competitorId;
+    private int uId;
     private String name;
     private String assignedColor; // E.g., "Red" or "Blue"
 
     public CompetitorEntity() {}
 
-    public CompetitorEntity(int competitorId, String name, String assignedColor) {
-        this.competitorId = competitorId;
+    public CompetitorEntity(int uId, String name, String assignedColor) {
+        this.uId = uId;
         this.name = name;
         this.assignedColor = assignedColor;
     }
 
     // Getters
-    public int getCompetitorId() { return competitorId; }
+    public int getuId() { return uId; }
     public String getName() { return name; }
     public String getAssignedColor() { return assignedColor; }
 
     // Setters
-    public void setCompetitorId(int competitorId) { this.competitorId = competitorId; }
+    public void setuId(int uId) { this.uId = uId; }
     public void setName(String name) { this.name = name; }
     public void setAssignedColor(String assignedColor) { this.assignedColor = assignedColor; }
 }

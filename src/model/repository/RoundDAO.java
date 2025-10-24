@@ -8,10 +8,18 @@ import java.util.Optional;
 
 public class RoundDAO {
 
+    private final MatchDAO matchDAO;
+    private final CompetitorDAO competitorDAO;
+
     private static final String TABLE_NAME = "ROUND_ENTITY";
     private static final String INSERT_SQL =
             "INSERT INTO " + TABLE_NAME +
                     " (MATCH_ID, ROUND_NUMBER, ROUND_WINNER_ID, FINAL_RED_SCORE, FINAL_BLUE_SCORE) VALUES (?, ?, ?, ?, ?)";
+
+    public RoundDAO(MatchDAO matchDAO, CompetitorDAO competitorDAO) {
+        this.matchDAO = matchDAO;
+        this.competitorDAO = competitorDAO;
+    }
 
     /**
      * Saves a new RoundEntity. Handles the potentially NULL winner ID.
@@ -20,12 +28,12 @@ public class RoundDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, round.getMatchId());
+            stmt.setInt(1, round.getMatch().getuId());
             stmt.setInt(2, round.getRoundNumber());
 
             // Handle nullable ROUND_WINNER_ID
-            if (round.getRoundWinnerId() != null) {
-                stmt.setInt(3, round.getRoundWinnerId());
+            if (round.getRoundWinner() != null) {
+                stmt.setInt(3, round.getRoundWinner().getuId());
             } else {
                 stmt.setNull(3, Types.INTEGER);
             }
@@ -69,15 +77,16 @@ public class RoundDAO {
     private RoundEntity mapResultSetToRound(ResultSet rs) throws SQLException {
         RoundEntity entity = new RoundEntity();
         entity.setRoundId(rs.getInt("ROUND_ID"));
-        entity.setMatchId(rs.getInt("MATCH_ID"));
+        int matchId = rs.getInt("MATCH_ID");
+        matchDAO.findById(matchId).ifPresent(entity::setMatch);
         entity.setRoundNumber(rs.getInt("ROUND_NUMBER"));
 
         // Handle nullable ROUND_WINNER_ID
         int winnerId = rs.getInt("ROUND_WINNER_ID");
         if (!rs.wasNull()) {
-            entity.setRoundWinnerId(winnerId);
+            competitorDAO.findById(winnerId).ifPresent(entity::setRoundWinner);
         } else {
-            entity.setRoundWinnerId(null);
+            entity.setRoundWinner(null);
         }
 
         entity.setFinalRedScore(rs.getInt("FINAL_RED_SCORE"));

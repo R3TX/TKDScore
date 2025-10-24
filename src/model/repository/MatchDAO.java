@@ -8,10 +8,16 @@ import java.util.Optional;
 
 public class MatchDAO {
 
+    private final CompetitorDAO competitorDAO;
+
     private static final String TABLE_NAME = "MATCH_ENTITY";
     private static final String INSERT_SQL =
             "INSERT INTO " + TABLE_NAME +
                     " (MATCH_NUMBER, RED_COMPETITOR_ID, BLUE_COMPETITOR_ID, MATCH_WINNER_ID) VALUES (?, ?, ?, ?)";
+
+    public MatchDAO(CompetitorDAO competitorDAO) {
+        this.competitorDAO = competitorDAO;
+    }
 
     /**
      * Saves a new MatchEntity. Handles the potentially NULL winner ID.
@@ -22,12 +28,12 @@ public class MatchDAO {
              PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, match.getMatchNumber());
-            stmt.setInt(2, match.getRedCompetitorId());
-            stmt.setInt(3, match.getBlueCompetitorId());
+            stmt.setInt(2, match.getRedCompetitor().getuId());
+            stmt.setInt(3, match.getBlueCompetitor().getuId());
 
             // Handle nullable MATCH_WINNER_ID
-            if (match.getMatchWinnerId() != null) {
-                stmt.setInt(4, match.getMatchWinnerId());
+            if (match.getMatchWinner() != null) {
+                stmt.setInt(4, match.getMatchWinner().getuId());
             } else {
                 stmt.setNull(4, Types.INTEGER);
             }
@@ -36,7 +42,7 @@ public class MatchDAO {
 
             try (ResultSet keys = stmt.getGeneratedKeys()) {
                 if (keys.next()) {
-                    match.setMatchId(keys.getInt(1));
+                    match.setuId(keys.getInt(1));
                 }
             }
         } catch (SQLException e) {
@@ -67,17 +73,22 @@ public class MatchDAO {
 
     private MatchEntity mapResultSetToMatch(ResultSet rs) throws SQLException {
         MatchEntity entity = new MatchEntity();
-        entity.setMatchId(rs.getInt("MATCH_ID"));
+        entity.setuId(rs.getInt("MATCH_ID"));
         entity.setMatchNumber(rs.getInt("MATCH_NUMBER"));
-        entity.setRedCompetitorId(rs.getInt("RED_COMPETITOR_ID"));
-        entity.setBlueCompetitorId(rs.getInt("BLUE_COMPETITOR_ID"));
+
+        //get id for competitors
+        int redId = rs.getInt("RED_COMPETITOR_ID");
+        int blueId = rs.getInt("BLUE_COMPETITOR_ID");
+
+        competitorDAO.findById(redId).ifPresent(entity::setRedCompetitor);
+        competitorDAO.findById(blueId).ifPresent(entity::setBlueCompetitor);
 
         // Handle nullable MATCH_WINNER_ID
         int winnerId = rs.getInt("MATCH_WINNER_ID");
         if (!rs.wasNull()) {
-            entity.setMatchWinnerId(winnerId);
+            competitorDAO.findById(winnerId).ifPresent(entity::setMatchWinner);
         } else {
-            entity.setMatchWinnerId(null);
+            entity.setMatchWinner(null);
         }
         return entity;
     }
