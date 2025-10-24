@@ -3,7 +3,6 @@ package controller.listeners;
 import controller.match.ChronometerListener;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class Chronometer {
     private int minutes;
@@ -11,16 +10,16 @@ public class Chronometer {
     private String matchTime;
     private String breakTime;
 
-    private final Timer timer;
+    private Timer timer;
     private ChronometerListener listener; // Nuevo: Callback para notificar al Controller
 
     /**
      * Constructor refactorizado. Ya no recibe JLabels.
      * Recibe el Listener que se encarga de la lógica de fin de tiempo.
      *
-     * @param breakTime   Tiempo por defecto del descanso.
-     * @param listener    El MatchController que implementa ChronometerListener.
-     * @param matchTime   Tiempo por defecto del round.
+     * @param breakTime Tiempo por defecto del descanso.
+     * @param listener  El MatchController que implementa ChronometerListener.
+     * @param matchTime Tiempo por defecto del round.
      */
 
     public Chronometer(ChronometerListener listener, String matchTime, String breakTime) {
@@ -36,7 +35,9 @@ public class Chronometer {
         // 1. Actualiza el tiempo interno (minutos y segundos)
         updateTime();
         // 2. Notifica al controlador el nuevo tiempo para que se actualice la vista
-        listener.onTimeUpdate(getCurrentTimeDisplay());
+        if (listener != null) {
+            listener.onTimeUpdate(getCurrentTimeDisplay());
+        }
     }
 
     public void updateTime() {
@@ -57,11 +58,11 @@ public class Chronometer {
         }
     }
 
-        private String getCurrentTimeDisplay() {
-            String second = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
-            String minute = minutes < 10 ? "0" + minutes : String.valueOf(minutes);
-            return minute + ":" + second;
-        }
+    public String getCurrentTimeDisplay() {
+        String second = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
+        String minute = minutes < 10 ? "0" + minutes : String.valueOf(minutes);
+        return minute + ":" + second;
+    }
 
     public void startStopTimer() {
         if (timer.isRunning()) {
@@ -70,12 +71,13 @@ public class Chronometer {
             timer.start();
         }
     }
-    public void stopTime(){
-            timer.stop();
+
+    public void stopTime() {
+        timer.stop();
     }
 
     public void restartTime(String time) {
-       // No detenemos el timer aquí. Es responsabilidad del controlador
+        // No detenemos el timer aquí. Es responsabilidad del controlador
         // si quiere detenerlo y luego reiniciarlo.
         // Si el controlador llama a restartTime(), es para reajustar el valor.
 
@@ -113,7 +115,7 @@ public class Chronometer {
         this.breakTime = breakTime;
     }
 
-    public boolean isRunning(){
+    public boolean isRunning() {
         return timer.isRunning();
     }
 

@@ -52,17 +52,19 @@ public class TDKMouseListener implements MouseListener {
                         break;
 
                     case "round":
-                        String blueWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de azul", TDKScoreUtils.NUMERIC_REGEX, "0");
-                        String redWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de rojo", TDKScoreUtils.NUMERIC_REGEX, "0");
+                        String blueWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de azul", TDKScoreUtils.NUMERIC_REGEX, "1");
+                        String redWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de rojo", TDKScoreUtils.NUMERIC_REGEX, "1");
+                        String roundScore = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para el round ", TDKScoreUtils.NUMERIC_REGEX, "1");
                         if (StringUtils.isNoneEmpty(blueWins) && StringUtils.isNoneEmpty(redWins)) {
                             // 📞 Llama al Controller. ELIMINAR manipulación directa de jLabelList
-                            matchController.setRoundWins(Integer.parseInt(blueWins), Integer.parseInt(redWins));
+                            matchController.setManualRoundWins(Integer.parseInt(blueWins), Integer.parseInt(redWins));
+                            matchController.manualUpdateRoundNumber(Integer.parseInt(roundScore));
                         }
                     case "match":
                         input = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC, TDKScoreUtils.NUMERIC_REGEX, label.getText());
                         if (StringUtils.isNoneEmpty(input)) {
                             // 📞 Llama al Controller
-                            matchController.setMatchNumber(Integer.parseInt(input));
+                            matchController.manualUpdateMatchNumber(Integer.parseInt(input));
                         }
                         break;
                     case "timer":
@@ -71,7 +73,7 @@ public class TDKMouseListener implements MouseListener {
 
                         // 📞 Llama al Controller
                         if (StringUtils.isNoneEmpty(matchTime) && StringUtils.isNoneEmpty(breakTime)) {
-                            matchController.updateAndResetMatchTimes(matchTime, breakTime);
+                            matchController.manualUpdateAndResetMatchTimes(matchTime, breakTime);
                         }
                         break;
                 }

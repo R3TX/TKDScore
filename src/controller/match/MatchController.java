@@ -16,11 +16,13 @@ public class MatchController implements ChronometerListener{
     private final RoundService roundService;
     private final RoundStatisticsService statsService;
     private final CompetitorService competitorService;
-    private final Chronometer chronometer;
+    private Chronometer chronometer;
     private final ScoreboardView scoreboardView;
 
     private MatchEntity currentMatch;
     private RoundEntity currentRound;
+    private RoundStatisticsEntity blueStatics;
+    private RoundStatisticsEntity redStatics;
     private boolean isBreakTime = false;
 
     public MatchController(MatchService matchService,
@@ -35,6 +37,14 @@ public class MatchController implements ChronometerListener{
         this.competitorService = competitorService;
         this.chronometer = chronometer;
         this.scoreboardView = scoreboardView;
+        CompetitorEntity competitorRed= competitorService.save(new CompetitorEntity("red",PlayerColor.RED.name()));
+        CompetitorEntity competitorBlue= competitorService.save(new CompetitorEntity("blue",PlayerColor.BLUE.name()));
+
+        currentMatch=matchService.createNewMatch(1,competitorRed.getuId(),competitorBlue.getuId());
+        currentRound= roundService.startNewRound(currentMatch.getuId(),1);
+        redStatics = statsService.getOrCreateStats(currentRound.getRoundId(),competitorRed.getuId());
+        blueStatics = statsService.getOrCreateStats(currentRound.getRoundId(),competitorBlue.getuId());
+
     }
     public int getCurrentRoundId() {
         if (currentRound == null) {
@@ -48,39 +58,34 @@ public class MatchController implements ChronometerListener{
 
     private void updateScoreboard() {
 
-        if (currentMatch == null || currentRound == null) return;
+        if (redStatics == null || blueStatics == null) return;
         // 1. Obtener los datos del modelo (RoundStatisticsEntity)
-        RoundStatisticsEntity redStats = statsService.getOrCreateStats(getCurrentRoundId(), currentMatch.getRedCompetitor().getuId());
-        RoundStatisticsEntity blueStats = statsService.getOrCreateStats(getCurrentRoundId(), currentMatch.getBlueCompetitor().getuId());
         // 2. Actualizar el Score y los Fouls
-        scoreboardView.updateMainScore(redStats.getTotalScore(), blueStats.getTotalScore());
-        scoreboardView.updateFouls(redStats.getGamJeomFouls(), blueStats.getGamJeomFouls());
-        scoreboardView.updateHeadKicks(redStats.getHeadKicks(),blueStats.getHeadKicks());
+        scoreboardView.updateMainScore(redStatics.getTotalScore(), blueStatics.getTotalScore());
+        scoreboardView.updateFouls(redStatics.getGamJeomFouls(), blueStatics.getGamJeomFouls());
+        scoreboardView.updateHeadKicks(redStatics.getHeadKicks(),blueStatics.getHeadKicks());
     }
 
-    // Método para ser llamado por el cronómetro o un Timer de Swing
-    public void updateTimerDisplay(String time) {
-        scoreboardView.updateTimerDisplay(time);
-    }
-    public void updateRoundNumber(int roundNumber) {
-        scoreboardView.updateRoundNumber(roundNumber);
-    }
+
 
     // =================================================================
     // REFACTORIZACIÓN DE MÉTODOS EXISTENTES
     // =================================================================
 
+    // =================================================================
     // --- new methods for KeyListener ---
+    // =================================================================
+
 
     public void registerScore(PlayerColor playerColor, int points) {
         if (!chronometer.isRunning() || isBreakTime) {
             return; // if time is running and is not break time a point is marked
         }
-        int competitorId = PlayerColor.BLUE.equals(playerColor) ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
+        RoundStatisticsEntity competitor = PlayerColor.BLUE.equals(playerColor) ? blueStatics : redStatics;
 
         // La lógica de 3 puntos (cabeza) debe ser manejada en el Listener o aquí si se usa un flag.
         // Asumiendo que 'points' ya es el total (e.g., 3 para cabeza).
-        statsService.registerScore(getCurrentRoundId(), competitorId, points, points == 3);
+        statsService.registerScore(competitor, points, points == 3);
         updateScoreboard(); // Notificar a la vista
     }
 
@@ -90,18 +95,17 @@ public class MatchController implements ChronometerListener{
         boolean forBlue = PlayerColor.BLUE.equals(playerColor);
 
         // 1. Penalizar al Competidor A (A recibe Gam-Jeom)
-        int penalizedId = forBlue ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
-        statsService.registerGamJeom(getCurrentRoundId(), penalizedId);
+        RoundStatisticsEntity penalizedId = forBlue ? blueStatics : redStatics;
+        statsService.registerGamJeom(penalizedId);
 
         // 2. Otorgar punto al Competidor B (B recibe el punto)
-        int pointsCompetitorId = forBlue ? currentMatch.getRedCompetitor().getuId() : currentMatch.getBlueCompetitor().getuId();
-        statsService.registerScore(getCurrentRoundId(), pointsCompetitorId, 1, false);
+        RoundStatisticsEntity pointsCompetitorId = forBlue ? redStatics : blueStatics;
+        statsService.registerScore(pointsCompetitorId, 1, false);
 
         updateScoreboard(); // Notificar a la vista
 
         // 3. Verificar si el límite de faltas fue alcanzado (5)
-        RoundStatisticsEntity penalizedStats = statsService.getOrCreateStats(getCurrentRoundId(), penalizedId);
-        if (penalizedStats.getGamJeomFouls() >= 5) {
+        if (penalizedId.getGamJeomFouls() >= 5) {
             handleGamJeomLimit(!forBlue); // El ganador es el otro competidor
         }
     }
@@ -109,23 +113,13 @@ public class MatchController implements ChronometerListener{
     public void decreaseGamJeom(PlayerColor playerColor) {
         if (isBreakTime) return; // No faltas en descanso
 
-        boolean forBlue = PlayerColor.BLUE.equals(playerColor);
-
         // 1. Despenalizar al Competidor A (A recibe Gam-Jeom)
-        int penalizedId = forBlue ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
-        statsService.decreaseGamJeom(getCurrentRoundId(), penalizedId);
-
-        // 2. Otorgar punto al Competidor B (B recibe el punto)
-        int pointsCompetitorId = forBlue ? currentMatch.getRedCompetitor().getuId() : currentMatch.getBlueCompetitor().getuId();
-        statsService.decreaseScore(getCurrentRoundId(), pointsCompetitorId, 1);
-
-        updateScoreboard(); // Notificar a la vista
-
-        // 3. Verificar si el límite de faltas fue alcanzado (5)
-        RoundStatisticsEntity penalizedStats = statsService.getOrCreateStats(getCurrentRoundId(), penalizedId);
-        if (penalizedStats.getGamJeomFouls() >= 5) {
-            handleGamJeomLimit(!forBlue); // El ganador es el otro competidor
+        if(PlayerColor.BLUE.equals(playerColor)) {
+            statsService.decreaseGamJeom(blueStatics , redStatics);
+        }else{
+            statsService.decreaseGamJeom(redStatics , blueStatics);
         }
+        updateScoreboard(); // Notificar a la vista
     }
 
     public void toggleTimer() {
@@ -140,21 +134,22 @@ public class MatchController implements ChronometerListener{
         }
     }
 
-    /**
-     * Revisar y ajustar
-     */
-    /*
-    private void resetScoreboardView() {
-        for (int i = 0; i < jLabelList.size(); i++) {
-            jLabelList.get(i).setText(initialLabelTexts.get(i));
+    public void decreaseRoundScore(PlayerColor playerColor) {
+        if (!chronometer.isRunning()) {
+            RoundStatisticsEntity competitor = PlayerColor.BLUE.equals(playerColor) ? blueStatics : redStatics;
+            statsService.decreaseScore(competitor);
         }
-        jLabelList.get(1).setBackground(Color.BLUE); // Usar constantes de color si existen
-        jLabelList.get(5).setBackground(Color.RED);
-        jLabelList.get(17).setBackground(Color.BLACK); // Asumiendo que 17 es el label de 'Break'
-        chronometer.restartTime(chronometer.getMatchTime());
+        updateScoreboard(); // Delegación a la vista
     }
-*/
+
+    //TODO check from here and add mouselistener
     // --- Nuevos métodos expuestos para MouseListener ---
+
+    public void manualUpdateRoundNumber(int roundNumber) {
+        currentRound.setRoundNumber(roundNumber);
+        roundService.updateRound(currentRound);
+        scoreboardView.updateRoundNumber(roundNumber);
+    }
 
     public void updateCompetitorName(String name, PlayerColor playerColor) {
         CompetitorEntity competitor = PlayerColor.BLUE.equals(playerColor) ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
@@ -175,15 +170,9 @@ public class MatchController implements ChronometerListener{
         updateScoreboard(); // Delegación a la vista
     }
 
-    public void decreaseRoundScore(PlayerColor playerColor) {
-        if (!chronometer.isRunning()) {
-            CompetitorEntity competitor = PlayerColor.BLUE.equals(playerColor) ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
-            statsService.decreaseScore(getCurrentRoundId(), competitor.getuId(), 1);
-        }
-        updateScoreboard(); // Delegación a la vista
-    }
 
-    public void setRoundWins(int blueWins, int redWins) {
+
+    public void setManualRoundWins(int blueWins, int redWins) {
         // Lógica de negocio: actualizar conteo de rondas ganadas (puede ser MatchService)
 
         currentMatch.setBlueWonRounds(blueWins);
@@ -198,7 +187,7 @@ public class MatchController implements ChronometerListener{
         }
     }
 
-    public void setMatchNumber(int matchNumber) {
+    public void manualUpdateMatchNumber(int matchNumber) {
         // Lógica de negocio: MatchService.updateMatchNumber(currentMatch.getuId(), matchNumber);
         currentMatch.setMatchNumber(matchNumber);
         matchService.updateMatch(currentMatch);
@@ -207,7 +196,7 @@ public class MatchController implements ChronometerListener{
         scoreboardView.updateMatchNumber(matchNumber);
     }
 
-    public void updateAndResetMatchTimes(String matchTime, String breakTime) {
+    public void manualUpdateAndResetMatchTimes(String matchTime, String breakTime) {
         if (matchTime.trim().isEmpty()) {
             matchTime = chronometer.getMatchTime();
         }
@@ -222,15 +211,6 @@ public class MatchController implements ChronometerListener{
 
     // --- Métodos de lógica movida de Listeners ---
 
-    public void handleTimeOut() {
-        if (!isBreakTime) {
-            // 📞 Llama al Controller: Fin de Ronda (por tiempo)
-            handleRoundTimeOut();
-        } else {
-            // 📞 Llama al Controller: Fin de Descanso
-            handleBreakTimeOut();
-        }
-    }
 
     // Lógica movida de Chronometer/PropertyChangeListener cuando el tiempo expira
     public void handleRoundTimeOut() {
@@ -336,41 +316,19 @@ public class MatchController implements ChronometerListener{
         scoreboardView.updateRoundWins(redWins, blueWins);
 
         // 3. Notificar a la vista que la ronda concluyó para manejar el estado visual
-        Integer winnerId = isBlueWinner ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
-        scoreboardView.onRoundConcluded(winnerId, true); // Inicia el descanso (isBreakTime = true)
+        PlayerColor playerColor = isBlueWinner ? PlayerColor.BLUE : PlayerColor.RED;
+        scoreboardView.onRoundConcluded(playerColor, true); // Inicia el descanso (isBreakTime = true)
 
         // 4. Lógica de control de tiempo
         chronometer.restartTime(chronometer.getBreakTime());
         isBreakTime=true;
-
-/*
-        JLabel roundWinnerLabel = jLabelList.get(isBlueWinner ? 1 : 5);
-        roundWinnerLabel.setBackground(Color.YELLOW);
-
-        JLabel winnerWinCountLabel = jLabelList.get(isBlueWinner ? 14 : 16);
-        int newWinCount = Integer.parseInt(winnerWinCountLabel.getText()) + 1;
-        winnerWinCountLabel.setText(String.valueOf(newWinCount));
-
-        // Actualizar el score principal (LABEL 1 y 5) con el nuevo contador de rondas ganadas
-        roundWinnerLabel.setText(String.valueOf(newWinCount));
-
-        // Restaurar el perdedor (etiqueta 1 y 5)
-        JLabel roundLoserLabel = jLabelList.get(!isBlueWinner ? 1 : 5);
-        JLabel loserWinCountLabel = jLabelList.get(!isBlueWinner ? 14 : 16);
-        roundLoserLabel.setText(loserWinCountLabel.getText());
-
-        // Iniciar el descanso
-        chronometer.restartTime(chronometer.getBreakTime());
-        chronometer.setIsBreakTime(true);
-
-        */
     }
 
     // El método showWinnerMessage es un componente de la VISTA y debería ser movido.
     // Lo dejo en el Controller como simplificación por ahora.
     private void showWinnerMessage(Boolean isBlueWinner) {
-        int winnerId = isBlueWinner ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
-        scoreboardView.onMatchConcluded(winnerId);
+        PlayerColor playerColor = isBlueWinner ? PlayerColor.BLUE : PlayerColor.RED;
+        scoreboardView.onMatchConcluded(playerColor);
     }
 
     private void restoreScore() {
@@ -603,6 +561,10 @@ public class MatchController implements ChronometerListener{
             handleBreakTimeOut();
         }
     }
+    public void setChronometerAndUpdateTimes(Chronometer chronometer){
+        setChronometer(chronometer);
+        scoreboardView.updateTimerDisplay(chronometer.getCurrentTimeDisplay());
+    }
 
     public boolean isBreakTime() {
         return isBreakTime;
@@ -610,5 +572,13 @@ public class MatchController implements ChronometerListener{
 
     public void setBreakTime(boolean breakTime) {
         isBreakTime = breakTime;
+    }
+
+    public Chronometer getChronometer() {
+        return chronometer;
+    }
+
+    public void setChronometer(Chronometer chronometer) {
+        this.chronometer = chronometer;
     }
 }
