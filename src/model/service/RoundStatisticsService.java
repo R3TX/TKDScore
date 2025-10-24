@@ -54,10 +54,36 @@ public class RoundStatisticsService {
         }
 
         // Logic: Recalculate total score (BaseScore - GamJeomFouls)
-        stats.setTotalScore(stats.getBaseScore() - stats.getGamJeomFouls());
+        stats.setTotalScore(stats.getBaseScore());
 
         // Update the database (assuming statsDAO.save handles update/insert)
         return statsDAO.save(stats);
+    }
+
+    /**
+     * Registers a score event (e.g., a kick) and updates the total score.
+     */
+    public RoundStatisticsEntity decreaseScore(int roundId, int competitorId, int points) {
+        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
+
+        // Business Logic: Update stats
+        if(stats.getBaseScore()-points>=0) {
+            stats.setBaseScore(stats.getBaseScore() - points);
+        }
+        // Logic: Recalculate total score (BaseScore - GamJeomFouls)
+        stats.setTotalScore(stats.getBaseScore());
+
+        // Update the database (assuming statsDAO.save handles update/insert)
+        return statsDAO.save(stats);
+    }
+
+    public void setManualScore(int roundId, int competitorId, int points){
+        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
+        stats.setBaseScore(points);
+        stats.setTotalScore(stats.getBaseScore());
+
+        // Update the database (assuming statsDAO.save handles update/insert)
+        statsDAO.save(stats);
     }
 
     /**
@@ -69,8 +95,20 @@ public class RoundStatisticsService {
         // Business Logic: Gam-Jeom increases foul count
         stats.setGamJeomFouls(stats.getGamJeomFouls() + 1);
 
-        // Logic: Recalculate total score (Gam-Jeom deductions are applied)
-        stats.setTotalScore(stats.getBaseScore() - stats.getGamJeomFouls());
+        // Update the database
+        return statsDAO.save(stats);
+    }
+
+    /**
+     * Registers a foul (Gam-Jeom) and updates the total score (deducts 1 point).
+     */
+    public RoundStatisticsEntity decreaseGamJeom(int roundId, int competitorId) {
+        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
+
+        // Business Logic: Gam-Jeom increases foul count
+        if(stats.getGamJeomFouls()-1>=0 && stats.getBaseScore()-1>=0) {
+            stats.setGamJeomFouls(stats.getGamJeomFouls() - 1);
+        }
 
         // Update the database
         return statsDAO.save(stats);

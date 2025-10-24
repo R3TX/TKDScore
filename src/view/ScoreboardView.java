@@ -70,4 +70,11 @@ public interface ScoreboardView {
      * Resets all visual elements (scores, fouls, round wins) to zero or initial state.
      */
     void restoreInitialState();
+
+    /**
+     * Updates names
+     * @param redName
+     * @param blueName
+     */
+    void updateNames(String redName,String blueName);
 }

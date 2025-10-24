@@ -1,5 +1,7 @@
 package controller.listeners;
 
+import controller.match.MatchController;
+import model.entity.PlayerColor;
 import utils.TDKScoreUtils;
 
 import javax.swing.*;
@@ -10,19 +12,19 @@ import java.util.List;
 
 public class TKDKeyListener implements KeyListener {
     private final List<JLabel> jLabelList;
-    private final List<String> jLabelTextList;
     private final Chronometer chronometer;
     private final int widthSeparation;
     private final int heightLabel;
     private final Dimension screenSize;
+    private final MatchController matchController;
 
-    public TKDKeyListener(List<JLabel> jLabelList, List<String> jLabelTextList, Chronometer chronometer, int widthSeparation, int heightLabel, Dimension screenSize) {
+    public TKDKeyListener(List<JLabel> jLabelList, Chronometer chronometer, int widthSeparation, int heightLabel, Dimension screenSize, MatchController matchController) {
         this.jLabelList = jLabelList;
-        this.jLabelTextList = jLabelTextList;
         this.chronometer = chronometer;
         this.widthSeparation = widthSeparation;
         this.heightLabel = heightLabel;
         this.screenSize = screenSize;
+        this.matchController = matchController;
     }
 
     @Override
@@ -35,73 +37,46 @@ public class TKDKeyListener implements KeyListener {
         int keyCode = e.getKeyChar();
         switch (keyCode) {
             case '1':
-                    scorePlus(jLabelList.get(1), 1,false, false);
+                matchController.registerScore(PlayerColor.BLUE, 1);
                 break;
             case '3':
-                    scorePlus(jLabelList.get(5), 1, false, false);
+                matchController.registerScore(PlayerColor.RED, 1);
                 break;
             case '4':
-                    scorePlus(jLabelList.get(1), 2, false, false);
+                matchController.registerScore(PlayerColor.BLUE, 2);
                 break;
             case '6':
-                    scorePlus(jLabelList.get(5), 2, false, false);
+                matchController.registerScore(PlayerColor.RED, 2);
                 break;
             case '7':
-                    scorePlus(jLabelList.get(1), 3, false, false);
+                matchController.registerScore(PlayerColor.BLUE, 3);
                 break;
             case '9':
-                    scorePlus(jLabelList.get(5), 3, false, false);
+                matchController.registerScore(PlayerColor.RED, 3);
                 break;
             case '-':
-                scorePlus(jLabelList.get(5), 1,true, false);
-                scorePlus(jLabelList.get(3), 1,true, false);
+                matchController.registerGamJeom(PlayerColor.RED);
                 break;
             case '+':
-                scorePlus(jLabelList.get(1), 1,true, false);
-                scorePlus(jLabelList.get(7), 1,true,false );
+                matchController.registerGamJeom(PlayerColor.BLUE);
                 break;
             case '0':
-                if(Integer.parseInt(jLabelList.get(3).getText())-1>-1) {
-                    scorePlus(jLabelList.get(5), -1, true, false);
-                }
-                scorePlus(jLabelList.get(3), -1,true, false);
-
+                matchController.decreaseGamJeom(PlayerColor.RED);
                 break;
             case '2':
-                if(Integer.parseInt(jLabelList.get(7).getText())-1>-1) {
-                    scorePlus(jLabelList.get(1), -1, true, false);
-                }
-                scorePlus(jLabelList.get(7), -1,true,false );
-
+                matchController.decreaseGamJeom(PlayerColor.BLUE);
                 break;
             case '/':
-                int confirmDialog = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas continuar?", "Confirmación", JOptionPane.YES_NO_OPTION);
-
-                // Procesar la respuesta del usuario
-                if (confirmDialog == JOptionPane.YES_OPTION) {
-                    for(int i=0;i<jLabelList.size();i++){
-                        jLabelList.get(i).setText(jLabelTextList.get(i));
-                    }
-                    jLabelList.get(12).setText(chronometer.getMatchTime());
-                    chronometer.stopTime();
-                    chronometer.restartTime(chronometer.getMatchTime());
-                    jLabelList.get(1).setBackground(TDKScoreUtils.BLUE_COLOR);
-                    jLabelList.get(5).setBackground(TDKScoreUtils.RED_COLOR);
-                    jLabelList.get(17).setBackground(Color.BLACK);
-                }
+                matchController.requestFullMatchReset();
                 break;
-            case KeyEvent.VK_ENTER:
-                chronometer.startStopTimer();
+            case KeyEvent.VK_SPACE:
+                matchController.toggleTimer();
                 break;
             case '8':
-                if(!chronometer.isRunning()) {
-                    scorePlus(jLabelList.get(1), -1, false, true);
-                }
+                matchController.decreaseRoundScore(PlayerColor.BLUE);
                 break;
             case '5':
-                if(!chronometer.isRunning()) {
-                    scorePlus(jLabelList.get(5), -1, false,true );
-                }
+                matchController.decreaseRoundScore(PlayerColor.RED);
                 break;
 
 

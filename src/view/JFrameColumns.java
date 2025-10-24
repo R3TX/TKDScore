@@ -206,4 +206,9 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         redPanel.getHeadKickCount().setText("0");
         bluePanel.getHeadKickCount().setText("0");
     }
+
+    public void updateNames(String redName,String blueName){
+        redPanel.getCompetitorName().setText(redName);
+        bluePanel.getCompetitorName().setText(blueName);
+    }
 }

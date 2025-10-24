@@ -1,9 +1,7 @@
 package view;
 
 import controller.listeners.Chronometer;
-import controller.listeners.TDKMouseListener;
 import controller.listeners.TKDKeyListener;
-import controller.listeners.TKDScorePropertyChangeListener;
 import controller.match.MatchController;
 import model.repository.CompetitorDAO;
 import model.repository.MatchDAO;
@@ -53,7 +51,7 @@ public class Board {
 
         // 4. Instanciar la Capa de Controladores, inyectando Servicios
         // CompetitorController competitorController = new CompetitorController(competitorService);
-        MatchController matchController = new MatchController(matchService, roundService, statsService,competitorService);
+        MatchController matchController = new MatchController(matchService, roundService, statsService,competitorService,chronometer);
 
         JFrameColumns columns = new JFrameColumns(matchController,chronometer);
         /*
@@ -224,15 +222,15 @@ public class Board {
     }
 
     private void setAllVisible() {
-        TDKMouseListener tdkMouseListener = new TDKMouseListener(chronometer, jLabelList);
-        TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList, chronometer);
+     //   TDKMouseListener tdkMouseListener = new TDKMouseListener();
+       // TKDScorePropertyChangeListener tkdScorePropertyChangeListener = new TKDScorePropertyChangeListener(jLabelList, chronometer);
         jLabelList.forEach(x -> {
             x.setVisible(true);
             x.setForeground(Color.BLACK);
             x.setHorizontalAlignment(JLabel.CENTER);
             x.setVerticalAlignment(JLabel.CENTER);
-            x.addMouseListener(tdkMouseListener);
-            x.addPropertyChangeListener(tkdScorePropertyChangeListener);
+        //    x.addMouseListener(tdkMouseListener);
+           // x.addPropertyChangeListener(tkdScorePropertyChangeListener);
             boardBackground.add(x);
         });
     }
@@ -245,7 +243,7 @@ public class Board {
         boardBackground.setLayout(null);
         mainWindow.add(boardBackground);
         mainWindow.setVisible(true);
-        mainWindow.addKeyListener(new TKDKeyListener(jLabelList, jLabelTextList, chronometer, widthSeparation, heightLabel, Toolkit.getDefaultToolkit().getScreenSize()));
+   //     mainWindow.addKeyListener(new TKDKeyListener(jLabelList, chronometer, widthSeparation, heightLabel, Toolkit.getDefaultToolkit().getScreenSize()));
     }
 
 }

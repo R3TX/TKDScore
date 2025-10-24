@@ -48,6 +48,27 @@ public class MatchService {
     }
 
     /**
+     * Updates a match between two competitors.
+     * Applies business logic to ensure competitors exist.
+     * @param match the match to update.
+     * @return The newly created MatchEntity.
+     * @throws IllegalArgumentException if a competitor ID is invalid.
+     */
+    public MatchEntity updateMatch(MatchEntity match) {
+        // Business Logic: Ensure both competitors exist by checking the CompetitorDAO
+           if(match.getRedCompetitor()== null) {
+
+               throw new IllegalArgumentException("Red Competitor ID is invalid.");
+           }
+        if(match.getBlueCompetitor()== null) {
+
+            throw new IllegalArgumentException("Blue Competitor ID is invalid.");
+        }
+
+        return matchDAO.save(match);
+    }
+
+    /**
      * Records the final winner of the match and updates the entity.
      * @param matchId The ID of the match to update.
      * @param winnerId The ID of the winning competitor.
