@@ -66,8 +66,8 @@ public class DatabaseConnection {
                         "   RED_COMPETITOR_ID INT NOT NULL," +
                         "   BLUE_COMPETITOR_ID INT NOT NULL," +
                         "   MATCH_WINNER_ID INT," + // Nullable
-                        "   RED_WON_ROUNDS INT NOT NULL," + // Nullable
-                        "   BLUE_WON_ROUNDS INT NOT NULL," + // Nullable
+                        "   RED_WON_ROUNDS INT NOT NULL," +
+                        "   BLUE_WON_ROUNDS INT NOT NULL," +
                         "   FOREIGN KEY (RED_COMPETITOR_ID) REFERENCES COMPETITOR_ENTITY(COMPETITOR_ID)," +
                         "   FOREIGN KEY (BLUE_COMPETITOR_ID) REFERENCES COMPETITOR_ENTITY(COMPETITOR_ID)," +
                         "   FOREIGN KEY (MATCH_WINNER_ID) REFERENCES COMPETITOR_ENTITY(COMPETITOR_ID)" +
