@@ -11,7 +11,7 @@ import view.ScoreboardView;
 import javax.swing.*;
 import java.util.Optional;
 
-public class MatchController {
+public class MatchController implements ChronometerListener{
     private final MatchService matchService;
     private final RoundService roundService;
     private final RoundStatisticsService statsService;
@@ -21,9 +21,14 @@ public class MatchController {
 
     private MatchEntity currentMatch;
     private RoundEntity currentRound;
+    private boolean isBreakTime = false;
 
-
-    public MatchController(MatchService matchService, RoundService roundService, RoundStatisticsService statsService, CompetitorService competitorService, Chronometer chronometer, ScoreboardView scoreboardView) {
+    public MatchController(MatchService matchService,
+                           RoundService roundService,
+                           RoundStatisticsService statsService,
+                           CompetitorService competitorService,
+                           Chronometer chronometer,
+                           ScoreboardView scoreboardView) {
         this.matchService = matchService;
         this.roundService = roundService;
         this.statsService = statsService;
@@ -68,7 +73,7 @@ public class MatchController {
     // --- new methods for KeyListener ---
 
     public void registerScore(PlayerColor playerColor, int points) {
-        if (!chronometer.isRunning() || chronometer.isIS_BREAK_TIME()) {
+        if (!chronometer.isRunning() || isBreakTime) {
             return; // if time is running and is not break time a point is marked
         }
         int competitorId = PlayerColor.BLUE.equals(playerColor) ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
@@ -80,7 +85,7 @@ public class MatchController {
     }
 
     public void registerGamJeom(PlayerColor playerColor) {
-        if (chronometer.isIS_BREAK_TIME()) return; // No faltas en descanso
+        if (isBreakTime) return; // No faltas en descanso
 
         boolean forBlue = PlayerColor.BLUE.equals(playerColor);
 
@@ -102,7 +107,7 @@ public class MatchController {
     }
 
     public void decreaseGamJeom(PlayerColor playerColor) {
-        if (chronometer.isIS_BREAK_TIME()) return; // No faltas en descanso
+        if (isBreakTime) return; // No faltas en descanso
 
         boolean forBlue = PlayerColor.BLUE.equals(playerColor);
 
@@ -212,13 +217,13 @@ public class MatchController {
         chronometer.setMatchTime(matchTime);
         chronometer.setBreakTime(breakTime);
         chronometer.restartTime(matchTime);
-        chronometer.setIsBreakTime(false);
+        isBreakTime=false;
     }
 
     // --- Métodos de lógica movida de Listeners ---
 
     public void handleTimeOut() {
-        if (!chronometer.isIS_BREAK_TIME()) {
+        if (!isBreakTime) {
             // 📞 Llama al Controller: Fin de Ronda (por tiempo)
             handleRoundTimeOut();
         } else {
@@ -249,12 +254,24 @@ public class MatchController {
         setRoundWinner(isBlueWinner);
 
         // 4. Iniciar el tiempo de descanso (Lógica de la vista, ya manejada en Chronometer)
+        isBreakTime = true;
+        // La vista es notificada a través de setRoundWinner -> scoreboardView.onRoundConcluded(winnerId, true);
+        chronometer.restartTime(chronometer.getBreakTime());
+        chronometer.startStopTimer(); // Inicia el tiempo de descanso
     }
 
     public void handleBreakTimeOut() {
         // Lógica de la vista movida del Listener
         restoreScore(); // Reinicia el marcador de la ronda
         nextRound(); // Avanza el número de ronda
+
+        isBreakTime = false; // Actualiza el estado del controlador a modo Round
+
+        // Notifica a la vista para restablecer el indicador de "Break" (asumiendo que nextRound no lo hace)
+        scoreboardView.onRoundConcluded(null, false);
+
+        chronometer.restartTime(chronometer.getMatchTime());
+        chronometer.startStopTimer(); // Inicia el tiempo de la nueva ronda
     }
 
     // Lógica movida de PropertyChangeListener cuando se alcanza el límite de Gam-Jeom (5)
@@ -266,8 +283,10 @@ public class MatchController {
         }
 
         // Iniciar el descanso (Lógica de la vista)
+        isBreakTime = true; // Actualiza el estado
         chronometer.restartTime(chronometer.getBreakTime());
-        chronometer.setIsBreakTime(true);
+        chronometer.startStopTimer(); // Inicia el tiempo de descanso
+
         // El PropertyChangeListener de la falta ya reinició el contador a "0"
     }
 
@@ -322,7 +341,7 @@ public class MatchController {
 
         // 4. Lógica de control de tiempo
         chronometer.restartTime(chronometer.getBreakTime());
-        chronometer.setIsBreakTime(true);
+        isBreakTime=true;
 
 /*
         JLabel roundWinnerLabel = jLabelList.get(isBlueWinner ? 1 : 5);
@@ -567,5 +586,29 @@ public class MatchController {
         }
 
         return competitor.get().getName();
+    }
+
+    @Override
+    public void onTimeUpdate(String time) {
+        scoreboardView.updateTimerDisplay(time); // Simplemente delega a la vista
+    }
+
+    @Override
+    public void onTimeOut() {
+        if (!isBreakTime) {
+            // Fin de Ronda (por tiempo)
+            handleRoundTimeOut();
+        } else {
+            // Fin de Descanso
+            handleBreakTimeOut();
+        }
+    }
+
+    public boolean isBreakTime() {
+        return isBreakTime;
+    }
+
+    public void setBreakTime(boolean breakTime) {
+        isBreakTime = breakTime;
     }
 }

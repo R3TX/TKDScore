@@ -71,7 +71,7 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
         }
 
     }
-
+/*
     private void wonByGam(JLabel sourceLabel, boolean isBlueWinner){
         if(sourceLabel.getText().equals("5")){
             chronometer.restartTime(chronometer.getBreakTime());
@@ -80,7 +80,7 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
             setRoundWinner(isBlueWinner);
         }
     }
-
+*//*
     private void setRoundWinner( boolean isBlueWinner) {
         JLabel roundWinnerLabel = jLabelList.get(isBlueWinner ? 1 : 5);
         roundWinnerLabel.setBackground(Color.yellow);
@@ -91,7 +91,7 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
         roundWinnerLabel.setText(winnerLabel.getText());
         roundLoserLabel.setText(loserLabel.getText());
     }
-
+/*
     private void endScore(JLabel sourceLabel, boolean isBlueWinner){
         if(sourceLabel.getText().equals("2")){
             int result = JOptionPane.showOptionDialog(null, "¿Quien es el ganador final?", "Ganador", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[]{"AZUL", "ROJO"}, "AZUL");
@@ -106,7 +106,7 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
             showWinnerMessage(isBlueWinner);
         }
     }
-
+*//*
     private void showWinnerMessage(Boolean isBlueWinner){
 
         JFrame endWinner = new JFrame();
@@ -216,6 +216,6 @@ public class TKDScorePropertyChangeListener implements PropertyChangeListener {
         }
         jLabelList.get(11).setText(String.valueOf(currentRound));
 
-    }
+    }*/
 
 }

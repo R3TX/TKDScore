@@ -1,5 +1,7 @@
 package controller.listeners;
 
+import controller.match.ChronometerListener;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,61 +10,58 @@ public class Chronometer {
     private int seconds;
     private String matchTime;
     private String breakTime;
-    private boolean IS_BREAK_TIME;
-    private final JLabel timerLabel;
-    private final JLabel breakLabel;
 
     private final Timer timer;
+    private ChronometerListener listener; // Nuevo: Callback para notificar al Controller
 
-    public Chronometer(JLabel timerLabel, String matchTime, String breackTime, JLabel breakLabel) {
-        this.timerLabel = timerLabel;
-        this.breakLabel=breakLabel;
+    /**
+     * Constructor refactorizado. Ya no recibe JLabels.
+     * Recibe el Listener que se encarga de la lógica de fin de tiempo.
+     *
+     * @param breakTime   Tiempo por defecto del descanso.
+     * @param listener    El MatchController que implementa ChronometerListener.
+     * @param matchTime   Tiempo por defecto del round.
+     */
+
+    public Chronometer(ChronometerListener listener, String matchTime, String breakTime) {
         this.matchTime = matchTime;
-        this.breakTime = breackTime;
-        this.minutes = Integer.parseInt(timerLabel.getText().split(":")[0]);
-        this.seconds = Integer.parseInt(timerLabel.getText().split(":")[1]);
+        this.breakTime = breakTime;
+        // Inicializa el tiempo con el valor dado (usualmente el Match Time)
+        parseTime(matchTime);
+        this.listener = listener;
         this.timer = new Timer(1000, e -> initTimer());
     }
 
     public void initTimer() {
+        // 1. Actualiza el tiempo interno (minutos y segundos)
         updateTime();
-        updateLabel();
+        // 2. Notifica al controlador el nuevo tiempo para que se actualice la vista
+        listener.onTimeUpdate(getCurrentTimeDisplay());
     }
 
     public void updateTime() {
         seconds--;
 
-        if (minutes <= 0 && seconds <= 0) {
-
-            if (!IS_BREAK_TIME) {
-                updateLabel();
-                restartTime(breakTime);
-                timer.start();
-                IS_BREAK_TIME = true;
-                breakLabel.setOpaque(true);
-                breakLabel.setForeground(Color.BLACK);
-                breakLabel.setBackground(Color.YELLOW);
-
-            } else {
-                timer.stop();
-                updateLabel();
-                IS_BREAK_TIME = false;
-                breakLabel.setOpaque(false);
-                breakLabel.setForeground(Color.BLACK);
-                breakLabel.setBackground(Color.BLACK);
-                restartTime(matchTime);
-            }
-        }
         if (seconds < 0) {
             seconds = 59;
             minutes--;
         }
+
+        if (minutes < 0) {
+            minutes = 0;
+            seconds = 0;
+            timer.stop(); // Detener el motor de tiempo
+
+            // Llama al MatchController para que maneje el evento de fin de tiempo
+            listener.onTimeOut();
+        }
     }
 
-    public void updateLabel() {
-        String second = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
-        timerLabel.setText(minutes + ":" + second);
-    }
+        private String getCurrentTimeDisplay() {
+            String second = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
+            String minute = minutes < 10 ? "0" + minutes : String.valueOf(minutes);
+            return minute + ":" + second;
+        }
 
     public void startStopTimer() {
         if (timer.isRunning()) {
@@ -72,19 +71,30 @@ public class Chronometer {
         }
     }
     public void stopTime(){
-        if (timer.isRunning()) {
             timer.stop();
-        }
     }
 
     public void restartTime(String time) {
-        if (timer.isRunning()) {
-            timer.stop();
-        }
+       // No detenemos el timer aquí. Es responsabilidad del controlador
+        // si quiere detenerlo y luego reiniciarlo.
+        // Si el controlador llama a restartTime(), es para reajustar el valor.
 
-        timerLabel.setText(time);
-        this.minutes = Integer.parseInt(time.split(":")[0]);
-        this.seconds = Integer.parseInt(time.split(":")[1]);
+        parseTime(time);
+
+        // Notifica al controlador el nuevo valor inicial para la vista
+        listener.onTimeUpdate(getCurrentTimeDisplay());
+    }
+
+    private void parseTime(String time) {
+        String[] parts = time.split(":");
+        if (parts.length == 2) {
+            this.minutes = Integer.parseInt(parts[0]);
+            this.seconds = Integer.parseInt(parts[1]);
+        } else {
+            // Manejo de error o valor por defecto
+            this.minutes = 0;
+            this.seconds = 0;
+        }
     }
 
     public String getBreakTime() {
@@ -103,15 +113,15 @@ public class Chronometer {
         this.breakTime = breakTime;
     }
 
-    public void setIsBreakTime(boolean isBreakTime) {
-        IS_BREAK_TIME = isBreakTime;
-    }
-
-    public boolean isIS_BREAK_TIME() {
-        return IS_BREAK_TIME;
-    }
-
     public boolean isRunning(){
         return timer.isRunning();
+    }
+
+    public ChronometerListener getListener() {
+        return listener;
+    }
+
+    public void setListener(ChronometerListener listener) {
+        this.listener = listener;
     }
 }

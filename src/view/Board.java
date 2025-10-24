@@ -48,11 +48,29 @@ public class Board {
         RoundService roundService = new RoundService(roundDAO, matchDAO,competitorDAO);
         RoundStatisticsService statsService = new RoundStatisticsService(roundDAO, competitorDAO, statsDAO);
 
+        MatchController matchController = null;
+        JFrameColumns scoreboardView = null;
+        scoreboardView = new JFrameColumns();
+        Chronometer chronometer = new Chronometer(null, "01:30", "00:30");
+
+        matchController = new MatchController(
+                matchService,
+                roundService,
+                statsService,
+                competitorService,
+                chronometer,
+                scoreboardView // ¡Aquí se inyecta la ScoreboardView!
+        );
+
+        chronometer.setListener(matchController);
+        scoreboardView.setMatchController(matchController);
+        /*
         // 4. Instanciar la Capa de Controladores, inyectando Servicios
         // CompetitorController competitorController = new CompetitorController(competitorService);
         MatchController matchController = new MatchController(matchService, roundService, statsService,competitorService,chronometer);
 
-        JFrameColumns columns = new JFrameColumns(matchController);
+        JFrameColumns columns = new JFrameColumns();
+        */
         /*
         initializeComponents();
         setChronometerTimes(); // dont move
@@ -202,7 +220,7 @@ public class Board {
         String matchTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del round", TDKScoreUtils.TIME_REGEX, "02:00");
         String breakTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso", TDKScoreUtils.TIME_REGEX, "01:00");
         jLabelList.get(12).setText(matchTime);
-        chronometer = new Chronometer(jLabelList.get(12), matchTime, breakTime, jLabelList.get(17));
+       // chronometer = new Chronometer(jLabelList.get(12), matchTime, breakTime);
     }
 
     private void setLabelsName() {
