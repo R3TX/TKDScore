@@ -1,6 +1,7 @@
 package view;
 
 import controller.listeners.Chronometer;
+import controller.listeners.TKDKeyListener;
 import controller.match.MatchController;
 import model.repository.CompetitorDAO;
 import model.repository.MatchDAO;
@@ -51,19 +52,20 @@ public class Board {
         MatchController matchController = null;
         JFrameColumns scoreboardView = null;
         scoreboardView = new JFrameColumns();
-        Chronometer chronometer = new Chronometer(null, "01:30", "00:30");
+
 
         matchController = new MatchController(
                 matchService,
                 roundService,
                 statsService,
                 competitorService,
-                chronometer,
+                null,
                 scoreboardView // ¡Aquí se inyecta la ScoreboardView!
         );
 
-        chronometer.setListener(matchController);
-        scoreboardView.setMatchController(matchController);
+        Chronometer chronometer = new Chronometer(matchController, "00:10", "00:05");
+        matchController.setChronometerAndUpdateTimes(chronometer);
+        scoreboardView.addKeyListener(new TKDKeyListener(matchController));
         /*
         // 4. Instanciar la Capa de Controladores, inyectando Servicios
         // CompetitorController competitorController = new CompetitorController(competitorService);
