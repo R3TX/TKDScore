@@ -77,4 +77,17 @@ public interface ScoreboardView {
      * @param blueName
      */
     void updateNames(String redName,String blueName);
+
+    /**
+     * Updates kicks to head
+     * @param redKicks
+     * @param blueKicks
+     */
+    void updateHeadKicks(int redKicks, int blueKicks);
+
+    /**
+     * updates match number
+     * @param matchNumber
+     */
+    void updateMatchNumber(int matchNumber);
 }

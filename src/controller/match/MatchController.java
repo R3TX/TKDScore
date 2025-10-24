@@ -6,6 +6,7 @@ import model.service.CompetitorService;
 import model.service.MatchService;
 import model.service.RoundService;
 import model.service.RoundStatisticsService;
+import view.ScoreboardView;
 
 import javax.swing.*;
 import java.util.Optional;
@@ -16,17 +17,53 @@ public class MatchController {
     private final RoundStatisticsService statsService;
     private final CompetitorService competitorService;
     private final Chronometer chronometer;
+    private final ScoreboardView scoreboardView;
 
     private MatchEntity currentMatch;
     private RoundEntity currentRound;
 
-    public MatchController(MatchService matchService, RoundService roundService, RoundStatisticsService statsService, CompetitorService competitorService, Chronometer chronometer) {
+
+    public MatchController(MatchService matchService, RoundService roundService, RoundStatisticsService statsService, CompetitorService competitorService, Chronometer chronometer, ScoreboardView scoreboardView) {
         this.matchService = matchService;
         this.roundService = roundService;
         this.statsService = statsService;
         this.competitorService = competitorService;
         this.chronometer = chronometer;
+        this.scoreboardView = scoreboardView;
     }
+    public int getCurrentRoundId() {
+        if (currentRound == null) {
+            throw new IllegalStateException("No round is currently active.");
+        }
+        return currentRound.getRoundId();
+    }
+    // =================================================================
+    // MÉTODOS DE ACTUALIZACIÓN DE LA VISTA (NUEVO MÉTODO CENTRAL)
+    // =================================================================
+
+    private void updateScoreboard() {
+
+        if (currentMatch == null || currentRound == null) return;
+        // 1. Obtener los datos del modelo (RoundStatisticsEntity)
+        RoundStatisticsEntity redStats = statsService.getOrCreateStats(getCurrentRoundId(), currentMatch.getRedCompetitor().getuId());
+        RoundStatisticsEntity blueStats = statsService.getOrCreateStats(getCurrentRoundId(), currentMatch.getBlueCompetitor().getuId());
+        // 2. Actualizar el Score y los Fouls
+        scoreboardView.updateMainScore(redStats.getTotalScore(), blueStats.getTotalScore());
+        scoreboardView.updateFouls(redStats.getGamJeomFouls(), blueStats.getGamJeomFouls());
+        scoreboardView.updateHeadKicks(redStats.getHeadKicks(),blueStats.getHeadKicks());
+    }
+
+    // Método para ser llamado por el cronómetro o un Timer de Swing
+    public void updateTimerDisplay(String time) {
+        scoreboardView.updateTimerDisplay(time);
+    }
+    public void updateRoundNumber(int roundNumber) {
+        scoreboardView.updateRoundNumber(roundNumber);
+    }
+
+    // =================================================================
+    // REFACTORIZACIÓN DE MÉTODOS EXISTENTES
+    // =================================================================
 
     // --- new methods for KeyListener ---
 
@@ -94,15 +131,16 @@ public class MatchController {
         int confirmDialog = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas reiniciar TODO el partido?", "Confirmación", JOptionPane.YES_NO_OPTION);
         if (confirmDialog == JOptionPane.YES_OPTION) {
             resetMatch(); // Lógica de la capa de negocio (limpiar DB/estado)
-            resetScoreboardView(); // Lógica de la capa de la vista (limpiar JLabels)
+            scoreboardView.restoreInitialState(); // Lógica de la capa de la vista (limpiar JLabels)
         }
     }
 
     /**
      * Revisar y ajustar
      */
+    /*
     private void resetScoreboardView() {
-        for(int i = 0; i < jLabelList.size(); i++){
+        for (int i = 0; i < jLabelList.size(); i++) {
             jLabelList.get(i).setText(initialLabelTexts.get(i));
         }
         jLabelList.get(1).setBackground(Color.BLUE); // Usar constantes de color si existen
@@ -110,54 +148,48 @@ public class MatchController {
         jLabelList.get(17).setBackground(Color.BLACK); // Asumiendo que 17 es el label de 'Break'
         chronometer.restartTime(chronometer.getMatchTime());
     }
-
+*/
     // --- Nuevos métodos expuestos para MouseListener ---
 
-    // NOTA: Se necesita un método de CompetitorService para *actualizar* nombres.
-    // Usaremos un método simulado aquí, ya que no existe en el contexto de MatchController.
     public void updateCompetitorName(String name, PlayerColor playerColor) {
         CompetitorEntity competitor = PlayerColor.BLUE.equals(playerColor) ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
         competitor.setName(name);
         competitorService.save(competitor);
 
 
-
-        ///agregar view
-        // Actualizar la vista directamente (Index 0 = blueName, Index 4 = redName, según TDKKeyListener)
-        //jLabelList.get(isBlue ? 0 : 4).setText(name);
+        // Actualizar la vista mediante el método de la interfaz
+        String redName = currentMatch.getRedCompetitor().getName();
+        String blueName = currentMatch.getBlueCompetitor().getName();
+        scoreboardView.updateNames(redName, blueName);
     }
 
     public void setManualRoundScore(PlayerColor playerColor, int newScore) {
-
         CompetitorEntity competitor = PlayerColor.BLUE.equals(playerColor) ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
+        statsService.setManualScore(getCurrentRoundId(), competitor.getuId(), newScore);
 
-        statsService.setManualScore(getCurrentRoundId(),competitor.getuId(),newScore);
-
-        //llamar al view de main score
-       //todo
+        updateScoreboard(); // Delegación a la vista
     }
 
     public void decreaseRoundScore(PlayerColor playerColor) {
-        if(!chronometer.isRunning()) {
+        if (!chronometer.isRunning()) {
             CompetitorEntity competitor = PlayerColor.BLUE.equals(playerColor) ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
-
             statsService.decreaseScore(getCurrentRoundId(), competitor.getuId(), 1);
         }
-        //llamar al view de main score
-        //todo
+        updateScoreboard(); // Delegación a la vista
     }
 
     public void setRoundWins(int blueWins, int redWins) {
         // Lógica de negocio: actualizar conteo de rondas ganadas (puede ser MatchService)
-        // MatchService.setManualRoundWins(currentMatch.getuId(), blueWins, redWins);
 
-        // Actualizar la vista (Index 14 = blueWin, Index 16 = redWin)
-        jLabelList.get(14).setText(String.valueOf(blueWins));
-        jLabelList.get(16).setText(String.valueOf(redWins));
+        currentMatch.setBlueWonRounds(blueWins);
+        currentMatch.setRedWonRounds(redWins);
+        matchService.updateMatch(currentMatch);
+        // Actualizar la vista
+        scoreboardView.updateRoundWins(redWins, blueWins);
 
         // Verificar si se alcanzó el límite de match
         if (blueWins >= 2 || redWins >= 2) {
-            handleMatchWin(blueWins >= 2);
+            handleMatchWin(PlayerColor.BLUE);
         }
     }
 
@@ -166,14 +198,15 @@ public class MatchController {
         currentMatch.setMatchNumber(matchNumber);
         matchService.updateMatch(currentMatch);
 
-        // TODO Actualizar la vista (Index 9 = match number)
+        //UPdateview
+        scoreboardView.updateMatchNumber(matchNumber);
     }
 
     public void updateAndResetMatchTimes(String matchTime, String breakTime) {
-        if(matchTime.trim().isEmpty()){
+        if (matchTime.trim().isEmpty()) {
             matchTime = chronometer.getMatchTime();
         }
-        if(breakTime.trim().isEmpty()){
+        if (breakTime.trim().isEmpty()) {
             breakTime = chronometer.getBreakTime();
         }
         chronometer.setMatchTime(matchTime);
@@ -184,7 +217,7 @@ public class MatchController {
 
     // --- Métodos de lógica movida de Listeners ---
 
-    public void handleTimeOut(){
+    public void handleTimeOut() {
         if (!chronometer.isIS_BREAK_TIME()) {
             // 📞 Llama al Controller: Fin de Ronda (por tiempo)
             handleRoundTimeOut();
@@ -197,8 +230,8 @@ public class MatchController {
     // Lógica movida de Chronometer/PropertyChangeListener cuando el tiempo expira
     public void handleRoundTimeOut() {
         // 1. Detener el cronómetro (ya lo hace Chronometer antes de la llamada a este método)
-        int blueScore=currentRound.getFinalBlueScore();
-        int redScore=currentRound.getFinalRedScore();
+        int blueScore = currentRound.getFinalBlueScore();
+        int redScore = currentRound.getFinalRedScore();
 
         // 2. Determinar ganador de la ronda
         boolean isBlueWinner;
@@ -245,10 +278,10 @@ public class MatchController {
         boolean isBlueWinner = result == JOptionPane.YES_OPTION;
 
         // 2. Lógica de negocio (registrar ganador en MatchEntity - requiere un ID)
-         CompetitorEntity winnerId = isBlueWinner ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
-         currentMatch.setMatchWinner(winnerId);
-         matchService.updateMatch(currentMatch);
-         //finishMatch(currentMatch.getuId(), winnerId);
+        CompetitorEntity winnerId = isBlueWinner ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
+        currentMatch.setMatchWinner(winnerId);
+        matchService.updateMatch(currentMatch);
+        //finishMatch(currentMatch.getuId(), winnerId);
 
         // 3. Lógica de la vista: reiniciar el estado
         /*
@@ -270,6 +303,28 @@ public class MatchController {
     // Movido de TKDScorePropertyChangeListener
     private void setRoundWinner(boolean isBlueWinner) {
         // Actualizar JLabels para reflejar el ganador de la ronda
+
+        int redWins=currentMatch.getRedWonRounds();
+        int blueWins=currentMatch.getBlueWonRounds();
+
+        if (isBlueWinner) {
+            blueWins++;
+            currentMatch.setBlueWonRounds(blueWins); // Asumimos setters existen
+        } else {
+            redWins++;
+            currentMatch.setRedWonRounds(redWins); // Asumimos setters existen
+        }
+        scoreboardView.updateRoundWins(redWins, blueWins);
+
+        // 3. Notificar a la vista que la ronda concluyó para manejar el estado visual
+        Integer winnerId = isBlueWinner ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
+        scoreboardView.onRoundConcluded(winnerId, true); // Inicia el descanso (isBreakTime = true)
+
+        // 4. Lógica de control de tiempo
+        chronometer.restartTime(chronometer.getBreakTime());
+        chronometer.setIsBreakTime(true);
+
+/*
         JLabel roundWinnerLabel = jLabelList.get(isBlueWinner ? 1 : 5);
         roundWinnerLabel.setBackground(Color.YELLOW);
 
@@ -288,6 +343,15 @@ public class MatchController {
         // Iniciar el descanso
         chronometer.restartTime(chronometer.getBreakTime());
         chronometer.setIsBreakTime(true);
+
+        */
+    }
+
+    // El método showWinnerMessage es un componente de la VISTA y debería ser movido.
+    // Lo dejo en el Controller como simplificación por ahora.
+    private void showWinnerMessage(Boolean isBlueWinner) {
+        int winnerId = isBlueWinner ? currentMatch.getBlueCompetitor().getuId() : currentMatch.getRedCompetitor().getuId();
+        scoreboardView.onMatchConcluded(winnerId);
     }
 
     private void restoreScore() {
@@ -316,26 +380,9 @@ public class MatchController {
          */
     }
 
-    // Método simulado para notificar a la vista sobre cambios (se usaría en los métodos de puntuación)
-    private void updateScoreboard() {
-        // En un MVC completo, este método llamaría a una interfaz (ScoreboardView) para actualizar todos los campos relevantes
-        // basándose en el estado de MatchEntity/RoundEntity.
 
-        // Simulación: forzar la actualización de JLabels de puntaje y faltas
-        RoundStatisticsEntity blueStats = statsService.getOrCreateStats(getCurrentRoundId(), currentMatch.getBlueCompetitor().getuId());
-        RoundStatisticsEntity redStats = statsService.getOrCreateStats(getCurrentRoundId(), currentMatch.getRedCompetitor().getuId());
 
-        jLabelList.get(1).setText(String.valueOf(blueStats.getTotalScore())); // Blue Score
-        jLabelList.get(5).setText(String.valueOf(redStats.getTotalScore())); // Red Score
-        jLabelList.get(7).setText(String.valueOf(blueStats.getGamJeomCount())); // Blue Gam-Jeom (asumiendo índices)
-        jLabelList.get(3).setText(String.valueOf(redStats.getGamJeomCount())); // Red Gam-Jeom (asumiendo índices)
-    }
 
-    // El método showWinnerMessage es un componente de la VISTA y debería ser movido.
-    // Lo dejo en el Controller como simplificación por ahora.
-    private void showWinnerMessage(Boolean isBlueWinner) {
-        // ... (Implementación de la ventana de ganador)
-    }
 
     // --- Métodos existentes (mantener o adaptar) ---
     // ... getCurrentMatch(), getCurrentRoundId(), finishCurrentRound(), etc.
@@ -343,14 +390,13 @@ public class MatchController {
     // ya que la lógica de tiempo/estado se mueve al MatchController.
 
 
-
-
     // --- Match Flow Management ---
 
     /**
      * Starts a new match and the first round.
-     * @param matchNumber The number of the new match.
-     * @param redCompetitorId The ID of the red competitor.
+     *
+     * @param matchNumber      The number of the new match.
+     * @param redCompetitorId  The ID of the red competitor.
      * @param blueCompetitorId The ID of the blue competitor.
      * @return The newly created MatchEntity.
      */
@@ -368,6 +414,7 @@ public class MatchController {
 
     /**
      * Provides access to the MatchEntity that is currently active.
+     *
      * @return The currently active MatchEntity.
      * @throws IllegalStateException if no match is currently active.
      */
@@ -381,7 +428,8 @@ public class MatchController {
 
     /**
      * Starts a new sequential round (e.g., Round 2 after Round 1 finishes).
-     * @param matchId The ID of the current match.
+     *
+     * @param matchId     The ID of the current match.
      * @param roundNumber The number of the round (2 or 3).
      * @return The newly created RoundEntity.
      */
@@ -391,20 +439,17 @@ public class MatchController {
         return newRound;
     }
 
-    public int getCurrentRoundId() {
-        if (currentRound == null) {
-            throw new IllegalStateException("No round is currently active.");
-        }
-        return currentRound.getRoundId();
-    }
 
+/*
     public RoundStatisticsEntity registerScoreEvent(int competitorId, int points, boolean isHeadKick) {
         return registerScore(getCurrentRoundId(), competitorId, points, isHeadKick);
     }
+*/
+    /*
     public RoundStatisticsEntity registerGamJeomEvent(int competitorId) {
         return registerGamJeom(getCurrentRoundId(), competitorId);
     }
-
+*/
     public RoundEntity finishCurrentRound() {
         RoundEntity finishedRound = finishRound(getCurrentRoundId());
 
@@ -434,7 +479,8 @@ public class MatchController {
 
     /**
      * Finalizes the current match, setting the official winner.
-     * @param matchId The ID of the match.
+     *
+     * @param matchId  The ID of the match.
      * @param winnerId The ID of the winning competitor.
      * @return The updated MatchEntity.
      */
@@ -447,30 +493,35 @@ public class MatchController {
 
     /**
      * Registers a score event for a competitor in the current round.
-     * @param roundId The current active round ID.
+     *
+     * @param roundId      The current active round ID.
      * @param competitorId The ID of the scoring competitor.
-     * @param points The base points scored (1, 2, or 3).
-     * @param isHeadKick True if the score was a head kick.
+     * @param points       The base points scored (1, 2, or 3).
+     * @param isHeadKick   True if the score was a head kick.
      * @return The updated RoundStatisticsEntity.
      */
+    /*
     public RoundStatisticsEntity registerScore(int roundId, int competitorId, int points, boolean isHeadKick) {
         return statsService.registerScore(roundId, competitorId, points, isHeadKick);
     }
-
+*/
     /**
      * Registers a Gam-Jeom foul for a competitor in the current round.
-     * @param roundId The current active round ID.
+     *
+     * @param roundId      The current active round ID.
      * @param competitorId The ID of the penalized competitor.
      * @return The updated RoundStatisticsEntity.
      */
+    /*
     public RoundStatisticsEntity registerGamJeom(int roundId, int competitorId) {
         return statsService.registerGamJeom(roundId, competitorId);
     }
-
+*/
     /**
      * Finalizes the current round based on the scores accumulated in RoundStatistics.
      * NOTE: Actual score calculation (who wins the round) should be done here
      * or delegated back to a service layer method that analyzes the current stats.
+     *
      * @param roundId The ID of the round to finish.
      */
     public RoundEntity finishRound(int roundId) {
@@ -502,6 +553,7 @@ public class MatchController {
     /**
      * Retrieves the competitor's name based on their ID, primarily for display in the View.
      * This decouples the View (JFrameColumns) from the Data Access layer.
+     *
      * @param competitorId The ID of the competitor.
      * @return The competitor's name (String).
      * @throws RuntimeException if the competitor is not found.
