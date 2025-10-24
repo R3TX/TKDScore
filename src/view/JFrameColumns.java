@@ -1,6 +1,5 @@
 package view;
 
-import controller.listeners.Chronometer;
 import controller.match.MatchController;
 import model.entity.MatchEntity;
 import model.entity.PlayerColor;
@@ -12,18 +11,14 @@ import java.awt.*;
 public class JFrameColumns extends JFrame implements ScoreboardView {
 
     private final MatchController matchController;
-    private final Chronometer chronometer; // Se requiere para el control de tiempo
 
     private PanelGridScore redPanel;
     private PanelGridScore bluePanel;
     private PanelGridTime timePanel;
 
-    public JFrameColumns(MatchController matchController, Chronometer chronometer) {
+    public JFrameColumns(MatchController matchController) {
         this.matchController = matchController;
-        this.chronometer = chronometer;
         createBoardView();
-
-
     }
 
     public void createBoardView(){
@@ -80,6 +75,8 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         redPanel.getCompetitorScore().setText(String.valueOf(redScore));
         bluePanel.getCompetitorScore().setText(String.valueOf(blueScore));
         // Logic for font resizing based on score (if applicable) goes here
+        redPanel.getCompetitorScore().repaint(); // Asegurar el repintado
+        bluePanel.getCompetitorScore().repaint();
     }
 
     @Override
@@ -87,16 +84,20 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         // The view uses the GAM-JEOM count
         redPanel.getGamjeonCount().setText(String.valueOf(redFouls));
         bluePanel.getGamjeonCount().setText(String.valueOf(blueFouls));
+        redPanel.getGamjeonCount().repaint();
+        bluePanel.getGamjeonCount().repaint();
     }
 
     @Override
     public void updateTimerDisplay(String time) {
         timePanel.getTimeScore().setText(time);
+        timePanel.getTimeScore().repaint();
     }
 
     @Override
     public void updateRoundNumber(int roundNumber) {
         timePanel.getRoundScore().setText(String.valueOf(roundNumber));
+        timePanel.getRoundScore().repaint();
     }
 
     @Override
@@ -104,6 +105,8 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         // The view uses 'victoriesCount' for total rounds won in the match
         redPanel.getVictoriesCount().setText(String.valueOf(redWins));
         bluePanel.getVictoriesCount().setText(String.valueOf(blueWins));
+        redPanel.getVictoriesCount().repaint();
+        bluePanel.getVictoriesCount().repaint();
     }
 
     // --- Game Flow and State Methods ---
@@ -203,12 +206,24 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         updateMainScore(0, 0);
         updateFouls(0, 0);
         // HeadKickCount must also be reset if they are per round.
-        redPanel.getHeadKickCount().setText("0");
-        bluePanel.getHeadKickCount().setText("0");
+        updateHeadKicks(0,0);
     }
 
     public void updateNames(String redName,String blueName){
         redPanel.getCompetitorName().setText(redName);
         bluePanel.getCompetitorName().setText(blueName);
+    }
+
+    @Override
+    public void updateHeadKicks(int redKicks, int blueKicks) {
+        redPanel.getHeadKickCount().setText(String.valueOf(redKicks));
+        bluePanel.getHeadKickCount().setText(String.valueOf(redKicks));
+        redPanel.getHeadKickCount().repaint();
+        bluePanel.getHeadKickCount().repaint();
+    }
+
+    public void updateMatchNumber(int matchNumber){
+        timePanel.getMatchScore().setText(String.valueOf(matchNumber));
+        timePanel.getMatchScore().repaint();
     }
 }

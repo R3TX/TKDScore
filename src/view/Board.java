@@ -1,7 +1,6 @@
 package view;
 
 import controller.listeners.Chronometer;
-import controller.listeners.TKDKeyListener;
 import controller.match.MatchController;
 import model.repository.CompetitorDAO;
 import model.repository.MatchDAO;
@@ -53,7 +52,7 @@ public class Board {
         // CompetitorController competitorController = new CompetitorController(competitorService);
         MatchController matchController = new MatchController(matchService, roundService, statsService,competitorService,chronometer);
 
-        JFrameColumns columns = new JFrameColumns(matchController,chronometer);
+        JFrameColumns columns = new JFrameColumns(matchController);
         /*
         initializeComponents();
         setChronometerTimes(); // dont move

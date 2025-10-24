@@ -37,6 +37,8 @@ public class MatchDAO {
             } else {
                 stmt.setNull(4, Types.INTEGER);
             }
+            stmt.setInt(5, match.getRedWonRounds());
+            stmt.setInt(6, match.getBlueWonRounds());
 
             stmt.executeUpdate();
 
