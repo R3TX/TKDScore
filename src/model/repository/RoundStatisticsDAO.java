@@ -18,6 +18,10 @@ public class RoundStatisticsDAO {
     private static final String INSERT_SQL =
             "INSERT INTO " + TABLE_NAME +
                     " (ROUND_ID, COMPETITOR_ID, BASE_SCORE, GAM_JEOM_FOULS, HEAD_KICKS, TOTAL_SCORE) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_SQL =
+            "UPDATE " + TABLE_NAME +
+                    " SET BASE_SCORE = ?, GAM_JEOM_FOULS = ?, HEAD_KICKS = ?, TOTAL_SCORE = ?" +
+                    " WHERE ROUND_ID = ? AND COMPETITOR_ID = ?";
     private static final String SELECT_BY_COMPOSITE_ID_SQL =
             "SELECT * FROM " + TABLE_NAME + " WHERE ROUND_ID = ? AND COMPETITOR_ID = ?";
 
@@ -69,6 +73,32 @@ public class RoundStatisticsDAO {
         } catch (SQLException e) {
             // Check if the error is due to a primary key violation (record already exists)
             // If so, you'd execute an UPDATE here instead.
+            e.printStackTrace();
+        }
+        return stats;
+    }
+
+    public RoundStatisticsEntity updateRoundStatistics(RoundStatisticsEntity stats // Nuevo parámetro dinámico
+    ) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
+
+            // 1. Asignar los valores del SET (Parámetros 1 a 4)
+            stmt.setInt(1, stats.getBaseScore());
+            stmt.setInt(2, stats.getGamJeomFouls());
+            stmt.setInt(3, stats.getHeadKicks());
+            stmt.setInt(4, stats.getTotalScore());
+
+            // 2. Asignar los valores dinámicos del WHERE (Parámetros 5 y 6)
+            stmt.setInt(5, stats.getRound().getRoundId());
+            stmt.setInt(6, stats.getCompetitor().getuId());
+
+            // 3. Ejecutar la actualización
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Filas actualizadas: " + rowsAffected);
+
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar estadísticas de ronda.");
             e.printStackTrace();
         }
         return stats;

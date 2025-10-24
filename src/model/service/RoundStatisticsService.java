@@ -1,4 +1,5 @@
 package model.service;
+
 import model.entity.CompetitorEntity;
 import model.entity.RoundEntity;
 import model.entity.RoundStatisticsEntity;
@@ -44,73 +45,62 @@ public class RoundStatisticsService {
     /**
      * Registers a score event (e.g., a kick) and updates the total score.
      */
-    public RoundStatisticsEntity registerScore(int roundId, int competitorId, int points, boolean isHeadKick) {
-        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
+    public void registerScore(RoundStatisticsEntity stats, int points, boolean isHeadKick) {
 
         // Business Logic: Update stats
         stats.setBaseScore(stats.getBaseScore() + points);
         if (isHeadKick) {
             stats.setHeadKicks(stats.getHeadKicks() + 1);
         }
-
         // Logic: Recalculate total score (BaseScore - GamJeomFouls)
         stats.setTotalScore(stats.getBaseScore());
 
         // Update the database (assuming statsDAO.save handles update/insert)
-        return statsDAO.save(stats);
+        statsDAO.updateRoundStatistics(stats);
     }
 
     /**
      * Registers a score event (e.g., a kick) and updates the total score.
      */
-    public RoundStatisticsEntity decreaseScore(int roundId, int competitorId, int points) {
-        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
-
+    public void decreaseScore(RoundStatisticsEntity stats) {
         // Business Logic: Update stats
-        if(stats.getBaseScore()-points>=0) {
-            stats.setBaseScore(stats.getBaseScore() - points);
+        if (stats.getBaseScore() - 1 >= 0) {
+            stats.setBaseScore(stats.getBaseScore() - 1);
+            stats.setTotalScore(stats.getBaseScore());
+            statsDAO.updateRoundStatistics(stats);
         }
-        // Logic: Recalculate total score (BaseScore - GamJeomFouls)
-        stats.setTotalScore(stats.getBaseScore());
-
-        // Update the database (assuming statsDAO.save handles update/insert)
-        return statsDAO.save(stats);
     }
 
-    public void setManualScore(int roundId, int competitorId, int points){
+    public void setManualScore(int roundId, int competitorId, int points) {
         RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
         stats.setBaseScore(points);
         stats.setTotalScore(stats.getBaseScore());
 
         // Update the database (assuming statsDAO.save handles update/insert)
-        statsDAO.save(stats);
+        statsDAO.updateRoundStatistics(stats);
     }
 
     /**
      * Registers a foul (Gam-Jeom) and updates the total score (deducts 1 point).
      */
-    public RoundStatisticsEntity registerGamJeom(int roundId, int competitorId) {
-        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
-
+    public void registerGamJeom(RoundStatisticsEntity stats) {
         // Business Logic: Gam-Jeom increases foul count
         stats.setGamJeomFouls(stats.getGamJeomFouls() + 1);
 
         // Update the database
-        return statsDAO.save(stats);
+        statsDAO.updateRoundStatistics(stats);
     }
 
     /**
      * Registers a foul (Gam-Jeom) and updates the total score (deducts 1 point).
      */
-    public RoundStatisticsEntity decreaseGamJeom(int roundId, int competitorId) {
-        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
-
+    public void decreaseGamJeom(RoundStatisticsEntity stats, RoundStatisticsEntity point) {
         // Business Logic: Gam-Jeom increases foul count
-        if(stats.getGamJeomFouls()-1>=0 && stats.getBaseScore()-1>=0) {
-            stats.setGamJeomFouls(stats.getGamJeomFouls() - 1);
-        }
 
-        // Update the database
-        return statsDAO.save(stats);
+        if (stats.getGamJeomFouls() - 1 >= 0) {
+            stats.setGamJeomFouls(stats.getGamJeomFouls() - 1);
+            decreaseScore(point);
+            statsDAO.updateRoundStatistics(stats);
+        }
     }
 }

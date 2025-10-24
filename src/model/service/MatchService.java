@@ -65,7 +65,7 @@ public class MatchService {
             throw new IllegalArgumentException("Blue Competitor ID is invalid.");
         }
 
-        return matchDAO.save(match);
+        return matchDAO.update(match);
     }
 
     /**
@@ -92,7 +92,7 @@ public class MatchService {
         }
         match.setMatchWinner(winner);
 
-        return matchDAO.save(match);
+        return matchDAO.update(match);
     }
 
     /**

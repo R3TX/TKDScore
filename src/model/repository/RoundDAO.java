@@ -16,9 +16,45 @@ public class RoundDAO {
             "INSERT INTO " + TABLE_NAME +
                     " (MATCH_ID, ROUND_NUMBER, ROUND_WINNER_ID, FINAL_RED_SCORE, FINAL_BLUE_SCORE) VALUES (?, ?, ?, ?, ?)";
 
+    private static final String UPDATE_SQL =
+            "UPDATE " + TABLE_NAME +
+                    " SET MATCH_ID = ?, ROUND_NUMBER = ?, ROUND_WINNER_ID = ?, FINAL_RED_SCORE = ?, FINAL_BLUE_SCORE = ?" +
+                    " WHERE ROUND_ID = ? ";
+
     public RoundDAO(MatchDAO matchDAO, CompetitorDAO competitorDAO) {
         this.matchDAO = matchDAO;
         this.competitorDAO = competitorDAO;
+    }
+
+    /**
+     * Saves a new RoundEntity. Handles the potentially NULL winner ID.
+     */
+    public RoundEntity update(RoundEntity round) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
+
+            // 1. Asignar los valores del SET (Parámetros 1 a 4)
+            stmt.setInt(1, round.getMatch().getuId());
+            stmt.setInt(2, round.getRoundNumber());
+            if (round.getRoundWinner() != null) {
+                stmt.setInt(3, round.getRoundWinner().getuId());
+            } else {
+                stmt.setNull(3, Types.INTEGER);
+            }
+            stmt.setInt(4, round.getFinalRedScore());
+            stmt.setInt(5, round.getFinalBlueScore());
+            stmt.setInt(6, round.getRoundId());
+
+
+            // 3. Ejecutar la actualización
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("updated round: "+round.getRoundId());
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+        return round;
     }
 
     /**
