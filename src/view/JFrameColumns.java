@@ -1,6 +1,5 @@
 package view;
 
-import controller.match.MatchController;
 import model.entity.MatchEntity;
 import model.entity.PlayerColor;
 import utils.TDKScoreUtils;
@@ -10,8 +9,6 @@ import java.awt.*;
 
 public class JFrameColumns extends JFrame implements ScoreboardView {
 
-    private MatchController matchController;
-
     private PanelGridScore redPanel;
     private PanelGridScore bluePanel;
     private PanelGridTime timePanel;
@@ -20,7 +17,7 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         createBoardView();
     }
 
-    public void createBoardView(){
+    public void createBoardView() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -71,41 +68,32 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
 
     @Override
     public void updateMainScore(int redScore, int blueScore) {
-        redPanel.getCompetitorScore().setText(String.valueOf(redScore));
-        bluePanel.getCompetitorScore().setText(String.valueOf(blueScore));
-        // Logic for font resizing based on score (if applicable) goes here
-        redPanel.getCompetitorScore().repaint(); // Asegurar el repintado
-        bluePanel.getCompetitorScore().repaint();
+        updateText(redPanel.getCompetitorScore(),String.valueOf(redScore));
+        updateText(bluePanel.getCompetitorScore(),String.valueOf(blueScore));
     }
 
     @Override
     public void updateFouls(int redFouls, int blueFouls) {
         // The view uses the GAM-JEOM count
-        redPanel.getGamjeonCount().setText(String.valueOf(redFouls));
-        bluePanel.getGamjeonCount().setText(String.valueOf(blueFouls));
-        redPanel.getGamjeonCount().repaint();
-        bluePanel.getGamjeonCount().repaint();
+        updateText(redPanel.getGamjeonCount(),String.valueOf(redFouls));
+        updateText(bluePanel.getGamjeonCount(),String.valueOf(blueFouls));
     }
 
     @Override
     public void updateTimerDisplay(String time) {
-        timePanel.getTimeScore().setText(time);
-        timePanel.getTimeScore().repaint();
+        updateText(timePanel.getTimeScore(), time);
     }
 
     @Override
     public void updateRoundNumber(int roundNumber) {
-        timePanel.getRoundScore().setText(String.valueOf(roundNumber));
-        timePanel.getRoundScore().repaint();
+        updateText(timePanel.getRoundScore(),String.valueOf(roundNumber));
     }
 
     @Override
     public void updateRoundWins(int redWins, int blueWins) {
         // The view uses 'victoriesCount' for total rounds won in the match
-        redPanel.getVictoriesCount().setText(String.valueOf(redWins));
-        bluePanel.getVictoriesCount().setText(String.valueOf(blueWins));
-        redPanel.getVictoriesCount().repaint();
-        bluePanel.getVictoriesCount().repaint();
+        updateText(redPanel.getVictoriesCount(),String.valueOf(redWins));
+        updateText(bluePanel.getVictoriesCount(),String.valueOf(blueWins));
     }
 
     // --- Game Flow and State Methods ---
@@ -113,19 +101,19 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     @Override
     public void onMatchStarted(MatchEntity match) {
         // 1. Update match number
-        timePanel.getMatchScore().setText(String.valueOf(match.getMatchNumber()));
+        updateText(timePanel.getMatchScore(),String.valueOf(match.getMatchNumber()));
 
         // 2. Update competitor names (assuming MatchController can retrieve them)
         try {
             // These methods must exist in MatchController to decouple the view from the DAO.
             String redName = match.getRedCompetitor().getName();
             String blueName = match.getBlueCompetitor().getName();
-            redPanel.getCompetitorName().setText(redName);
-            bluePanel.getCompetitorName().setText(blueName);
+            updateText(redPanel.getCompetitorName(),redName);
+            updateText(bluePanel.getCompetitorName(),blueName);
         } catch (Exception e) {
             System.err.println("Error setting competitor names: " + e.getMessage());
-            redPanel.getCompetitorName().setText("RED ID: " + match.getRedCompetitor().getuId());
-            bluePanel.getCompetitorName().setText("BLUE ID: " + match.getBlueCompetitor().getuId());
+            updateText(redPanel.getCompetitorName(),"RED");
+            updateText(bluePanel.getCompetitorName(),"BLUE");
         }
 
         // 3. Initialize state
@@ -135,46 +123,34 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     }
 
     @Override
-    public void onRoundConcluded(Integer winnerId, boolean isBreakTime) {
+    public void onRoundConcluded(PlayerColor playerColor, boolean isBreakTime) {
         // 1. Clear the scoreboard from the previous round
         restoreInitialScoreAndFouls();
 
         // 2. Handle the break/pause state
         if (isBreakTime) {
-            timePanel.getBreackName().setOpaque(true);
-            timePanel.getBreackName().setBackground(Color.YELLOW);
-            timePanel.getBreackName().setForeground(Color.BLACK);
+            timePanel.getBreackName().setVisible(true);
         } else {
-            timePanel.getBreackName().setOpaque(false);
-            timePanel.getBreackName().setBackground(Color.BLACK);
-            timePanel.getBreackName().setForeground(Color.WHITE); // Restore text color if dark
+            timePanel.getBreackName().setVisible(false);
         }
 
         // 3. Highlight the round winner (if applicable)
-        if (winnerId != null && winnerId != 0) {
-            MatchEntity currentMatch = matchController.getCurrentMatch();
-
-            PanelGridScore winnerPanel = (winnerId == currentMatch.getRedCompetitor().getuId())
+        if (playerColor != null) {
+            PanelGridScore winnerPanel = PlayerColor.RED.equals(playerColor)
                     ? redPanel : bluePanel;
             // It's assumed we only want to temporarily highlight the score with a different color.
             winnerPanel.getCompetitorScore().setBackground(Color.YELLOW);
 
-            JOptionPane.showMessageDialog(this, "Round concluded! Winner ID: " + winnerId, "End Round", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Round concluded! Winner ID: " + playerColor, "End Round", JOptionPane.INFORMATION_MESSAGE);
         }
 
         // NOTE: updateRoundWins() must be called by the controller after updating the model.
     }
 
     @Override
-    public void onMatchConcluded(int winnerId) {
-        MatchEntity currentMatch = matchController.getCurrentMatch();
-        String winnerName = "WINNER";
+    public void onMatchConcluded(PlayerColor playerColor) {
 
-        try {
-            winnerName = matchController.getCompetitorName(winnerId);
-        } catch (Exception ignored) { /* Use default value */ }
-
-        JOptionPane.showMessageDialog(this, "Match Finished! Overall Winner: " + winnerName, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Match Finished! Overall Winner: " + playerColor, "Game Over", JOptionPane.INFORMATION_MESSAGE);
 
         // Call full state restoration after showing the message.
         restoreInitialState();
@@ -186,13 +162,12 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         restoreInitialScoreAndFouls();
         updateRoundWins(0, 0);
         updateRoundNumber(1);
-        timePanel.getMatchScore().setText("0");
+        updateText(timePanel.getMatchScore(),"1");
 
         // Reset styles and colors
         redPanel.getCompetitorScore().setBackground(TDKScoreUtils.RED_COLOR);
         bluePanel.getCompetitorScore().setBackground(TDKScoreUtils.BLUE_COLOR);
-        timePanel.getBreackName().setOpaque(false);
-        timePanel.getBreackName().setBackground(Color.BLACK);
+        timePanel.getBreackName().setVisible(false);
 
         // Chronometer logic
         // chronometer.restartTime(chronometer.getMatchTime());
@@ -205,32 +180,27 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         updateMainScore(0, 0);
         updateFouls(0, 0);
         // HeadKickCount must also be reset if they are per round.
-        updateHeadKicks(0,0);
+        updateHeadKicks(0, 0);
     }
 
-    public void updateNames(String redName,String blueName){
-        redPanel.getCompetitorName().setText(redName);
-        bluePanel.getCompetitorName().setText(blueName);
+    public void updateNames(String redName, String blueName) {
+        updateText(redPanel.getCompetitorName(),redName);
+        updateText(bluePanel.getCompetitorName(),blueName);
     }
 
     @Override
     public void updateHeadKicks(int redKicks, int blueKicks) {
-        redPanel.getHeadKickCount().setText(String.valueOf(redKicks));
-        bluePanel.getHeadKickCount().setText(String.valueOf(redKicks));
-        redPanel.getHeadKickCount().repaint();
-        bluePanel.getHeadKickCount().repaint();
+        updateText(redPanel.getHeadKickCount(), String.valueOf(redKicks));
+        updateText(bluePanel.getHeadKickCount(), String.valueOf(blueKicks));
     }
 
-    public void updateMatchNumber(int matchNumber){
-        timePanel.getMatchScore().setText(String.valueOf(matchNumber));
-        timePanel.getMatchScore().repaint();
+    public void updateMatchNumber(int matchNumber) {
+        updateText(timePanel.getMatchScore(), String.valueOf(matchNumber));
     }
 
-    public MatchController getMatchController() {
-        return matchController;
-    }
-
-    public void setMatchController(MatchController matchController) {
-        this.matchController = matchController;
+    private void updateText(JLabel label, String text) {
+        label.setText(TDKScoreUtils.formatTextColor(text));
+        TDKScoreUtils.formatJlabelText(label);
+        label.repaint();
     }
 }

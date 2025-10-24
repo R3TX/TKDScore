@@ -37,7 +37,7 @@ public class PanelGridTime extends JPanel {
         // label for match score
         gbc.gridy = 1;
         gbc.weighty = SMALL_ROW_WEIGHT;
-        matchScore = ComponentBuilder.createAndAddLabel(this, gbc, "0", JLabel.CENTER, false, preferredSize008);
+        matchScore = ComponentBuilder.createAndAddLabel(this, gbc, "1", JLabel.CENTER, false, preferredSize008);
 
         // label for time
         gbc.gridy = 2;
@@ -48,6 +48,9 @@ public class PanelGridTime extends JPanel {
         gbc.gridy = 3;
         gbc.weighty = 0.2;
         breackName = ComponentBuilder.createAndAddLabel(this, gbc, "Break", JLabel.CENTER, false, new Dimension(1, labelHeight02));
+        breackName.setOpaque(true);
+        breackName.setBackground(Color.YELLOW);
+        breackName.setVisible(false);
 
         // Label for Round Name
         gbc.gridy = 4;
@@ -57,7 +60,7 @@ public class PanelGridTime extends JPanel {
         // Label for round Score
         gbc.gridy = 5;
         gbc.weighty = SMALL_ROW_WEIGHT;
-        roundScore = ComponentBuilder.createAndAddLabel(this, gbc, "0", JLabel.CENTER, false, preferredSize008);
+        roundScore = ComponentBuilder.createAndAddLabel(this, gbc, "1", JLabel.CENTER, false, preferredSize008);
 
     }
 
