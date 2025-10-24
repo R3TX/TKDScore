@@ -1,6 +1,7 @@
 package view;
 
 import model.entity.MatchEntity;
+import model.entity.PlayerColor;
 
 /**
  * Interface that defines the contract for the UI (JFrameColumns)
@@ -55,16 +56,18 @@ public interface ScoreboardView {
     /**
      * Notifies the view that a round has concluded and identifies the winner of that round.
      * The view should update the round wins display and potentially flash the winner's score.
-     * @param winnerId The ID of the competitor who won the round (or null/0 if a draw).
+     *
+     * @param playerColor The ID of the competitor who won the round (or null/0 if a draw).
      * @param isBreakTime True if the view should now display the break timer/indicator.
      */
-    void onRoundConcluded(Integer winnerId, boolean isBreakTime);
+    void onRoundConcluded(PlayerColor playerColor, boolean isBreakTime);
 
     /**
      * Notifies the view that the match is officially over and displays the final winner screen.
-     * @param winnerId The ID of the overall match winner.
+     *
+     * @param playerColor The ID of the overall match winner.
      */
-    void onMatchConcluded(int winnerId);
+    void onMatchConcluded(PlayerColor playerColor);
 
     /**
      * Resets all visual elements (scores, fouls, round wins) to zero or initial state.
