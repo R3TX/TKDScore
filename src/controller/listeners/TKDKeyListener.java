@@ -87,7 +87,7 @@ public class TKDKeyListener implements KeyListener {
     public void keyReleased(KeyEvent e) {
 
     }
-
+/*
     private void scorePlus(JLabel jLabel, int plus, boolean isFault, boolean isDecreasing) {
         if((((chronometer.isRunning() || isFault) && !chronometer.isIS_BREAK_TIME() )  ||  (!chronometer.isRunning() && isDecreasing)) && (Integer.parseInt(jLabel.getText())+plus)>=0){
             int currentScore = Integer.parseInt(jLabel.getText()) + plus;
@@ -99,5 +99,5 @@ public class TKDKeyListener implements KeyListener {
             }
         }
     }
-
+*/
 }

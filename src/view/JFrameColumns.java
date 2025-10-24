@@ -10,14 +10,13 @@ import java.awt.*;
 
 public class JFrameColumns extends JFrame implements ScoreboardView {
 
-    private final MatchController matchController;
+    private MatchController matchController;
 
     private PanelGridScore redPanel;
     private PanelGridScore bluePanel;
     private PanelGridTime timePanel;
 
-    public JFrameColumns(MatchController matchController) {
-        this.matchController = matchController;
+    public JFrameColumns() {
         createBoardView();
     }
 
@@ -225,5 +224,13 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     public void updateMatchNumber(int matchNumber){
         timePanel.getMatchScore().setText(String.valueOf(matchNumber));
         timePanel.getMatchScore().repaint();
+    }
+
+    public MatchController getMatchController() {
+        return matchController;
+    }
+
+    public void setMatchController(MatchController matchController) {
+        this.matchController = matchController;
     }
 }
