@@ -244,8 +244,8 @@ public class MatchController implements ChronometerListener {
     // Lógica movida de Chronometer/PropertyChangeListener cuando el tiempo expira
     public void handleRoundTimeOut() {
         // 1. Detener el cronómetro (ya lo hace Chronometer antes de la llamada a este método)
-        int blueScore = currentRound.getFinalBlueScore();
-        int redScore = currentRound.getFinalRedScore();
+        int blueScore = blueStatics.getBaseScore();
+        int redScore = redStatics.getBaseScore();
 
         // 2. Determinar ganador de la ronda
         boolean isBlueWinner;
