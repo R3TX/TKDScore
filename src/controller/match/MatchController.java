@@ -9,6 +9,7 @@ import model.service.RoundStatisticsService;
 import view.ScoreboardView;
 
 import javax.swing.*;
+import java.util.List;
 
 public class MatchController implements ChronometerListener {
     private final MatchService matchService;
@@ -48,20 +49,21 @@ public class MatchController implements ChronometerListener {
         currentRound = roundService.startNewRound(currentMatch.getuId(), currentRoundNumber);
         redStatics = statsService.createStats(currentRound.getRoundId(), competitorRed.getuId());
         blueStatics = statsService.createStats(currentRound.getRoundId(), competitorBlue.getuId());
-        firstPaint();
+        restoreViewValues();
     }
 
-    public void firstPaint() {
+    public void restoreViewValues() {
+        String redName = currentMatch.getRedCompetitor().getName();
+        String blueName = currentMatch.getBlueCompetitor().getName();
         //scoreboardView.updateTimerDisplay(chronometer.getCurrentTimeDisplay());
         scoreboardView.updateMainScore(redStatics.getBaseScore(), blueStatics.getBaseScore());
         scoreboardView.updateFouls(redStatics.getGamJeomFouls(), blueStatics.getGamJeomFouls());
         scoreboardView.updateHeadKicks(redStatics.getHeadKicks(), blueStatics.getHeadKicks());
         scoreboardView.updateRoundWins(currentMatch.getRedWonRounds(), currentMatch.getBlueWonRounds());
-        String redName = currentMatch.getRedCompetitor().getName();
-        String blueName = currentMatch.getBlueCompetitor().getName();
         scoreboardView.updateNames(redName, blueName);
         scoreboardView.updateRoundNumber(currentRound.getRoundNumber());
         scoreboardView.updateMatchNumber(currentMatch.getMatchNumber());
+        scoreboardView.restoreWinnerColor();
 
     }
 
@@ -147,8 +149,8 @@ public class MatchController implements ChronometerListener {
     public void requestFullMatchReset() {
         int confirmDialog = JOptionPane.showConfirmDialog(null, "¿Estás seguro de que deseas reiniciar TODO el partido?", "Confirmación", JOptionPane.YES_NO_OPTION);
         if (confirmDialog == JOptionPane.YES_OPTION) {
-            resetMatch(); // Lógica de la capa de negocio (limpiar DB/estado)
-            scoreboardView.restoreInitialState(); // Lógica de la capa de la vista (limpiar JLabels)
+            startNewMatch(); // Lógica de la capa de negocio (limpiar DB/estado)
+            restoreViewValues(); // Lógica de la capa de la vista (limpiar JLabels)
         }
     }
 
@@ -324,8 +326,6 @@ public class MatchController implements ChronometerListener {
             player = result == JOptionPane.OK_OPTION?PlayerColor.BLUE:PlayerColor.RED;
         }
 
-
-
         // 3. Registrar el ganador de la ronda (Lógica de negocio)
         PlayerColor matchWinner = setRoundWinner(player);
         //update current round
@@ -384,11 +384,33 @@ public class MatchController implements ChronometerListener {
         CompetitorEntity winnerId = isBlueWinner ? currentMatch.getBlueCompetitor() : currentMatch.getRedCompetitor();
         currentMatch.setMatchWinner(winnerId);
         matchService.updateMatch(currentMatch);
-        //finishMatch(currentMatch.getuId(), winnerId);
+        //save finished round
+        saveCurrentRound();
+
+        //get statistics
+        List<RoundEntity> roundList = roundService.findByMarchId(currentMatch.getuId());
+
+
+
+        //create a new match
+        startNewMatch();
+
 
         // 3. Lógica de la vista: reiniciar el estado
+        //cambiar estado del timer
+        changeTimerStatus();
+        restoreViewValues();
 
         showWinnerMessage(isBlueWinner); // Muestra el mensaje de ganador
+    }
+
+    public void startNewMatch(){
+        CompetitorEntity competitorRed = competitorService.save(new CompetitorEntity("RED", PlayerColor.RED.name()));
+        CompetitorEntity competitorBlue = competitorService.save(new CompetitorEntity("BLUE", PlayerColor.BLUE.name()));
+        currentMatch = matchService.createNewMatch(currentMatch.getMatchNumber()+1, competitorRed.getuId(), competitorBlue.getuId());
+        currentRound = roundService.startNewRound(currentMatch.getuId(), 1);
+        redStatics = statsService.createStats(currentRound.getRoundId(), competitorRed.getuId());
+        blueStatics = statsService.createStats(currentRound.getRoundId(), competitorBlue.getuId());
     }
 
 
@@ -419,28 +441,6 @@ public class MatchController implements ChronometerListener {
     // ya que la lógica de tiempo/estado se mueve al MatchController.
 
 
-    // --- Match Flow Management ---
-
-    /**
-     * Starts a new match and the first round.
-     *
-     * @param matchNumber      The number of the new match.
-     * @param redCompetitorId  The ID of the red competitor.
-     * @param blueCompetitorId The ID of the blue competitor.
-     * @return The newly created MatchEntity.
-     */
-    public MatchEntity startNewMatch(int matchNumber, int redCompetitorId, int blueCompetitorId) {
-        // 1. Create the Match
-        MatchEntity match = matchService.createNewMatch(matchNumber, redCompetitorId, blueCompetitorId);
-        // 2. Set the newly created match as the current active match
-        this.currentMatch = match;
-        // 3. Automatically start the first Round
-        // This is a common business logic requirement: Match start = Round 1 start.
-        startNewRound(match.getuId(), 1);
-
-        return match;
-    }
-
     /**
      * Provides access to the MatchEntity that is currently active.
      *
@@ -455,25 +455,6 @@ public class MatchController implements ChronometerListener {
         return currentMatch;
     }
 
-    /**
-     * Starts a new sequential round (e.g., Round 2 after Round 1 finishes).
-     *
-     * @param matchId     The ID of the current match.
-     * @param roundNumber The number of the round (2 or 3).
-     * @return The newly created RoundEntity.
-     */
-    public RoundEntity startNewRound(int matchId, int roundNumber) {
-        RoundEntity newRound = roundService.startNewRound(matchId, roundNumber);
-        this.currentRound = newRound;
-        return newRound;
-    }
-
-    public void resetMatch() {
-        // Lógica de negocio: borrar RoundStatistics, Round, y Match si es necesario.
-        // Aquí solo limpiamos el estado del controlador.
-        this.currentMatch = null;
-        this.currentRound = null;
-    }
     // --- Scoring and Statistics Management ---
 
     @Override

@@ -151,7 +151,7 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     }
 
     //Restore winner color
-    private void restoreWinnerColor(){
+    public void restoreWinnerColor(){
         redPanel.getCompetitorScore().setBackground(TDKScoreUtils.RED_COLOR);
         bluePanel.getCompetitorScore().setBackground(TDKScoreUtils.BLUE_COLOR);
     }
@@ -178,8 +178,6 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         bluePanel.getCompetitorScore().setBackground(TDKScoreUtils.BLUE_COLOR);
         timePanel.getBreakName().setVisible(false);
 
-        // Chronometer logic
-        // chronometer.restartTime(chronometer.getMatchTime());
     }
 
     // --- View Auxiliary Methods (UI) ---

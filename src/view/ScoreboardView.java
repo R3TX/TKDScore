@@ -102,4 +102,6 @@ public interface ScoreboardView {
      *
      */
     void restoreScoreFoulsHeadKick();
+
+    void restoreWinnerColor();
 }
