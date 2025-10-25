@@ -108,4 +108,9 @@ public class RoundStatisticsService {
             statsDAO.updateRoundStatistics(stats);
         }
     }
+
+    public void updateStatistics(RoundStatisticsEntity roundStatisticsEntity){
+
+        statsDAO.updateRoundStatistics(roundStatisticsEntity);
+    }
 }
