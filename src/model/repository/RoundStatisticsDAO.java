@@ -3,10 +3,7 @@ package model.repository;
 import model.entity.RoundStatisticsEntity;
 import utils.DatabaseConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Optional;
 
 public class RoundStatisticsDAO {
@@ -57,7 +54,7 @@ public class RoundStatisticsDAO {
      */
     public RoundStatisticsEntity save(RoundStatisticsEntity stats) {
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
+             PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, stats.getRound().getRoundId());
             stmt.setInt(2, stats.getCompetitor().getuId());
@@ -68,6 +65,11 @@ public class RoundStatisticsDAO {
             // Execute
             stmt.executeUpdate();
 
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    stats.setStatisticsId(keys.getInt(1));
+                }
+            }
         } catch (SQLException e) {
             // Check if the error is due to a primary key violation (record already exists)
             // If so, you'd execute an UPDATE here instead.
