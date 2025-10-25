@@ -87,13 +87,12 @@ public class DatabaseConnection {
 
         String createRoundStatsTable =
                 "CREATE TABLE IF NOT EXISTS ROUND_STATISTICS_ENTITY (" +
+                        "   STATISTICS_ID INT PRIMARY KEY AUTO_INCREMENT,"+
                         "   ROUND_ID INT NOT NULL," +
                         "   COMPETITOR_ID INT NOT NULL," +
                         "   BASE_SCORE INT NOT NULL," +
                         "   GAM_JEOM_FOULS INT NOT NULL," +
                         "   HEAD_KICKS INT NOT NULL," +
-                        "   TOTAL_SCORE INT NOT NULL," +
-                        "   PRIMARY KEY (ROUND_ID, COMPETITOR_ID)," +
                         "   FOREIGN KEY (ROUND_ID) REFERENCES ROUND_ENTITY(ROUND_ID)," +
                         "   FOREIGN KEY (COMPETITOR_ID) REFERENCES COMPETITOR_ENTITY(COMPETITOR_ID)" +
                         ");";

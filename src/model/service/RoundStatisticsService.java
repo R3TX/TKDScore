@@ -24,13 +24,24 @@ public class RoundStatisticsService {
     /**
      * Retrieves the stats for a competitor in a round, creating a new entity if none exists.
      */
-    public RoundStatisticsEntity getOrCreateStats(int roundId, int competitorId) {
-        // Attempt to find existing stats
-        Optional<RoundStatisticsEntity> statsOpt = statsDAO.findByCompositeId(roundId, competitorId);
+    public RoundStatisticsEntity getOrCreateStats(int statisticsId, int roundId, int competitorId) {
 
-        if (statsOpt.isPresent()) {
-            return statsOpt.get();
+        //Search for statics
+        RoundStatisticsEntity roundStatisticsEntity = getStatsById(statisticsId);
+        if(null != roundStatisticsEntity){
+            return roundStatisticsEntity;
         }
+
+        return createStats(roundId,competitorId);
+    }
+
+    public RoundStatisticsEntity getStatsById(int statisticsId){
+        // Attempt to find existing stats
+        Optional<RoundStatisticsEntity> statsOpt = statsDAO.findById(statisticsId);
+
+        return statsOpt.orElse(null);
+    }
+    public RoundStatisticsEntity createStats(int roundId, int competitorId){
         RoundEntity round = roundDAO.findById(roundId)
                 .orElseThrow(() -> new IllegalArgumentException("Round ID " + roundId + " is invalid."));
 
@@ -38,7 +49,7 @@ public class RoundStatisticsService {
                 .orElseThrow(() -> new IllegalArgumentException("Competitor ID " + competitorId + " is invalid."));
 
         // If not found, create a new entry in the database (initialize with 0s)
-        RoundStatisticsEntity newStats = new RoundStatisticsEntity(round, competitor, 0, 0, 0, 0);
+        RoundStatisticsEntity newStats = new RoundStatisticsEntity(round, competitor, 0, 0, 0);
         return statsDAO.save(newStats);
     }
 
@@ -52,8 +63,6 @@ public class RoundStatisticsService {
         if (isHeadKick) {
             stats.setHeadKicks(stats.getHeadKicks() + 1);
         }
-        // Logic: Recalculate total score (BaseScore - GamJeomFouls)
-        stats.setTotalScore(stats.getBaseScore());
 
         // Update the database (assuming statsDAO.save handles update/insert)
         statsDAO.updateRoundStatistics(stats);
@@ -66,17 +75,13 @@ public class RoundStatisticsService {
         // Business Logic: Update stats
         if (stats.getBaseScore() - 1 >= 0) {
             stats.setBaseScore(stats.getBaseScore() - 1);
-            stats.setTotalScore(stats.getBaseScore());
             statsDAO.updateRoundStatistics(stats);
         }
     }
 
-    public void setManualScore(int roundId, int competitorId, int points) {
-        RoundStatisticsEntity stats = getOrCreateStats(roundId, competitorId);
+    public void setManualScore(RoundStatisticsEntity stats, int points) {
         stats.setBaseScore(points);
-        stats.setTotalScore(stats.getBaseScore());
-
-        // Update the database (assuming statsDAO.save handles update/insert)
+        // Update the database
         statsDAO.updateRoundStatistics(stats);
     }
 

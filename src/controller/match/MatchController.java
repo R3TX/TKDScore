@@ -42,14 +42,14 @@ public class MatchController implements ChronometerListener {
 
         currentMatch = matchService.createNewMatch(1, competitorRed.getuId(), competitorBlue.getuId());
         currentRound = roundService.startNewRound(currentMatch.getuId(), 1);
-        redStatics = statsService.getOrCreateStats(currentRound.getRoundId(), competitorRed.getuId());
-        blueStatics = statsService.getOrCreateStats(currentRound.getRoundId(), competitorBlue.getuId());
+        redStatics = statsService.createStats(currentRound.getRoundId(), competitorRed.getuId());
+        blueStatics = statsService.createStats(currentRound.getRoundId(), competitorBlue.getuId());
         firstPaint();
     }
 
     public void firstPaint() {
         //scoreboardView.updateTimerDisplay(chronometer.getCurrentTimeDisplay());
-        scoreboardView.updateMainScore(redStatics.getTotalScore(), blueStatics.getTotalScore());
+        scoreboardView.updateMainScore(redStatics.getBaseScore(), blueStatics.getBaseScore());
         scoreboardView.updateFouls(redStatics.getGamJeomFouls(), blueStatics.getGamJeomFouls());
         scoreboardView.updateHeadKicks(redStatics.getHeadKicks(), blueStatics.getHeadKicks());
         scoreboardView.updateRoundWins(currentMatch.getRedWonRounds(), currentMatch.getBlueWonRounds());
@@ -76,7 +76,7 @@ public class MatchController implements ChronometerListener {
         if (redStatics == null || blueStatics == null) return;
         // 1. Obtener los datos del modelo (RoundStatisticsEntity)
         // 2. Actualizar el Score y los Fouls
-        scoreboardView.updateMainScore(redStatics.getTotalScore(), blueStatics.getTotalScore());
+        scoreboardView.updateMainScore(redStatics.getBaseScore(), blueStatics.getBaseScore());
         scoreboardView.updateFouls(redStatics.getGamJeomFouls(), blueStatics.getGamJeomFouls());
         scoreboardView.updateHeadKicks(redStatics.getHeadKicks(), blueStatics.getHeadKicks());
     }
@@ -538,11 +538,9 @@ public class MatchController implements ChronometerListener {
         int redId = match.getRedCompetitor().getuId();
         int blueId = match.getBlueCompetitor().getuId();
 
-        RoundStatisticsEntity redStats = statsService.getOrCreateStats(roundId, redId);
-        RoundStatisticsEntity blueStats = statsService.getOrCreateStats(roundId, blueId);
 
-        int redScore = redStats.getTotalScore();
-        int blueScore = blueStats.getTotalScore();
+        int redScore = redStatics.getBaseScore();
+        int blueScore = blueStatics.getBaseScore();
 
         Integer winnerId = null;
         if (redScore > blueScore) {

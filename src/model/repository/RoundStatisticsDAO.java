@@ -17,13 +17,13 @@ public class RoundStatisticsDAO {
     private static final String TABLE_NAME = "ROUND_STATISTICS_ENTITY";
     private static final String INSERT_SQL =
             "INSERT INTO " + TABLE_NAME +
-                    " (ROUND_ID, COMPETITOR_ID, BASE_SCORE, GAM_JEOM_FOULS, HEAD_KICKS, TOTAL_SCORE) VALUES (?, ?, ?, ?, ?, ?)";
+                    " (ROUND_ID, COMPETITOR_ID, BASE_SCORE, GAM_JEOM_FOULS, HEAD_KICKS) VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_SQL =
             "UPDATE " + TABLE_NAME +
-                    " SET BASE_SCORE = ?, GAM_JEOM_FOULS = ?, HEAD_KICKS = ?, TOTAL_SCORE = ?" +
-                    " WHERE ROUND_ID = ? AND COMPETITOR_ID = ?";
+                    " SET BASE_SCORE = ?, GAM_JEOM_FOULS = ?, HEAD_KICKS = ?" +
+                    " WHERE STATISTICS_ID = ?";
     private static final String SELECT_BY_COMPOSITE_ID_SQL =
-            "SELECT * FROM " + TABLE_NAME + " WHERE ROUND_ID = ? AND COMPETITOR_ID = ?";
+            "SELECT * FROM " + TABLE_NAME + " WHERE STATISTICS_ID = ? ";
 
     public RoundStatisticsDAO(RoundDAO roundDAO, CompetitorDAO competitorDAO) {
         this.roundDAO = roundDAO;
@@ -33,12 +33,11 @@ public class RoundStatisticsDAO {
     /**
      * Finds RoundStatisticsEntity using the composite key (Round ID and Competitor ID).
      */
-    public Optional<RoundStatisticsEntity> findByCompositeId(int roundId, int competitorId) {
+    public Optional<RoundStatisticsEntity> findById(int statisticsId) {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_COMPOSITE_ID_SQL)) {
 
-            stmt.setInt(1, roundId);
-            stmt.setInt(2, competitorId);
+            stmt.setInt(1, statisticsId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -65,7 +64,6 @@ public class RoundStatisticsDAO {
             stmt.setInt(3, stats.getBaseScore());
             stmt.setInt(4, stats.getGamJeomFouls());
             stmt.setInt(5, stats.getHeadKicks());
-            stmt.setInt(6, stats.getTotalScore());
 
             // Execute
             stmt.executeUpdate();
@@ -87,15 +85,11 @@ public class RoundStatisticsDAO {
             stmt.setInt(1, stats.getBaseScore());
             stmt.setInt(2, stats.getGamJeomFouls());
             stmt.setInt(3, stats.getHeadKicks());
-            stmt.setInt(4, stats.getTotalScore());
-
-            // 2. Asignar los valores dinámicos del WHERE (Parámetros 5 y 6)
-            stmt.setInt(5, stats.getRound().getRoundId());
-            stmt.setInt(6, stats.getCompetitor().getuId());
+            stmt.setInt(4, stats.getStatisticsId());
 
             // 3. Ejecutar la actualización
             int rowsAffected = stmt.executeUpdate();
-            System.out.println("Filas actualizadas: " + rowsAffected);
+            System.out.println("update  RoundStatisticsEntity: " + stats.getStatisticsId());
 
         } catch (SQLException e) {
             System.err.println("Error al actualizar estadísticas de ronda.");
@@ -106,6 +100,7 @@ public class RoundStatisticsDAO {
 
     private RoundStatisticsEntity mapResultSetToStats(ResultSet rs) throws SQLException {
         RoundStatisticsEntity entity = new RoundStatisticsEntity();
+        entity.setStatisticsId(rs.getInt("STATISTICS_ID"));
         int roundId = rs.getInt("ROUND_ID");
         int competitorId = rs.getInt("COMPETITOR_ID");
 
@@ -117,7 +112,6 @@ public class RoundStatisticsDAO {
         entity.setBaseScore(rs.getInt("BASE_SCORE"));
         entity.setGamJeomFouls(rs.getInt("GAM_JEOM_FOULS"));
         entity.setHeadKicks(rs.getInt("HEAD_KICKS"));
-        entity.setTotalScore(rs.getInt("TOTAL_SCORE"));
         return entity;
     }
 }
