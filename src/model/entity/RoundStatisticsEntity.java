@@ -1,24 +1,23 @@
 package model.entity;
 
 public class RoundStatisticsEntity {
-    // Composite Primary Key (roundId, competitorId)
+    // primaryKey
+    private int statisticsId;
     private RoundEntity round;
     private CompetitorEntity competitor;
 
     private int baseScore;
     private int gamJeomFouls;
     private int headKicks;
-    private int totalScore;
 
     public RoundStatisticsEntity() {}
 
-    public RoundStatisticsEntity(RoundEntity round, CompetitorEntity competitor, int baseScore, int gamJeomFouls, int headKicks, int totalScore) {
+    public RoundStatisticsEntity(RoundEntity round, CompetitorEntity competitor, int baseScore, int gamJeomFouls, int headKicks) {
         this.round = round;
         this.competitor = competitor;
         this.baseScore = baseScore;
         this.gamJeomFouls = gamJeomFouls;
         this.headKicks = headKicks;
-        this.totalScore = totalScore;
     }
 
     // Getters
@@ -27,7 +26,10 @@ public class RoundStatisticsEntity {
     public int getBaseScore() { return baseScore; }
     public int getGamJeomFouls() { return gamJeomFouls; }
     public int getHeadKicks() { return headKicks; }
-    public int getTotalScore() { return totalScore; }
+
+    public int getStatisticsId() {
+        return statisticsId;
+    }
 
     // Setters
     public void setRound(RoundEntity round) { this.round = round; }
@@ -35,5 +37,8 @@ public class RoundStatisticsEntity {
     public void setBaseScore(int baseScore) { this.baseScore = baseScore; }
     public void setGamJeomFouls(int gamJeomFouls) { this.gamJeomFouls = gamJeomFouls; }
     public void setHeadKicks(int headKicks) { this.headKicks = headKicks; }
-    public void setTotalScore(int totalScore) { this.totalScore = totalScore; }
+
+    public void setStatisticsId(int statisticsId) {
+        this.statisticsId = statisticsId;
+    }
 }
