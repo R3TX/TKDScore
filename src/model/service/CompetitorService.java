@@ -1,8 +1,8 @@
 package model.service;
+
 import model.entity.CompetitorEntity;
 import model.repository.CompetitorDAO;
 
-import java.util.List;
 import java.util.Optional;
 
 public class CompetitorService {
@@ -16,6 +16,7 @@ public class CompetitorService {
 
     /**
      * Finds a Competitor by their unique ID.
+     *
      * @param id The Competitor's ID.
      * @return An Optional containing the CompetitorEntity, or empty if not found.
      */
@@ -35,6 +36,7 @@ public class CompetitorService {
     /**
      * Saves a new Competitor or updates an existing one.
      * Includes basic business logic validation (e.g., name must not be empty).
+     *
      * @param competitor The CompetitorEntity to save.
      * @return The saved CompetitorEntity.
      * @throws IllegalArgumentException if validation fails.
@@ -47,5 +49,23 @@ public class CompetitorService {
             throw new IllegalArgumentException("Competitor assigned color cannot be empty.");
         }
         return competitorDAO.save(competitor);
+    }
+
+    /**
+     * updates an existing one.
+     * Includes basic business logic validation (e.g., name must not be empty).
+     *
+     * @param competitor The CompetitorEntity to save.
+     * @return The saved CompetitorEntity.
+     * @throws IllegalArgumentException if validation fails.
+     */
+    public CompetitorEntity update(CompetitorEntity competitor) {
+        if (competitor.getName() == null || competitor.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Competitor name cannot be empty.");
+        }
+        if (competitor.getAssignedColor() == null || competitor.getAssignedColor().trim().isEmpty()) {
+            throw new IllegalArgumentException("Competitor assigned color cannot be empty.");
+        }
+        return competitorDAO.update(competitor);
     }
 }

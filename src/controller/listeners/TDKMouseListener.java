@@ -24,54 +24,115 @@ public class TDKMouseListener implements MouseListener {
         // Verify what object was clicked
         if (source instanceof JLabel) {
             JLabel label = (JLabel) source;
-            if(StringUtils.isNoneEmpty(label.getName())) {
+            if (StringUtils.isNoneEmpty(label.getName())) {
                 String input;
                 switch (label.getName()) {
-                    case "blueName":
-                        input = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NAME, TDKScoreUtils.NAME_REGEX, label.getText());
+                    case "nameBLUE":
+                        input = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NAME,
+                                        TDKScoreUtils.NAME_REGEX,
+                                        TDKScoreUtils.extractTextFromHtml(label.getText()));
                         if (StringUtils.isNoneEmpty(input)) {
                             matchController.updateCompetitorName(input, PlayerColor.BLUE);
                         }
-                    case "redName":
-                        input = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NAME, TDKScoreUtils.NAME_REGEX, label.getText());
+                        break;
+                    case "nameRED":
+                        input = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NAME,
+                                        TDKScoreUtils.NAME_REGEX,
+                                        TDKScoreUtils.extractTextFromHtml(label.getText()));
                         if (StringUtils.isNoneEmpty(input)) {
                             matchController.updateCompetitorName(input, PlayerColor.RED);
                         }
                         break;
+                    case "victoryScoreBLUE":
+                        input = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NEW_SCORE,
+                                        TDKScoreUtils.VICTORY_NUMERIC_REGEX,
+                                        TDKScoreUtils.extractTextFromHtml(label.getText()));
+                        if (StringUtils.isNoneEmpty(input)) {
+                            matchController.setManualWin(PlayerColor.BLUE, Integer.parseInt(input));
+                        }
+                        break;
+                    case "victoryScoreRED":
+                        input = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NEW_SCORE,
+                                        TDKScoreUtils.VICTORY_NUMERIC_REGEX,
+                                        TDKScoreUtils.extractTextFromHtml(label.getText()));
+                        if (StringUtils.isNoneEmpty(input)) {
+                            matchController.setManualWin(PlayerColor.RED, Integer.parseInt(input));
+                        }
+                        break;
 
-                    case "blueScore":
-                        input=TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NEW_SCORE, TDKScoreUtils.NUMERIC_REGEX, label.getText());
+                    case "competitorScoreBLUE":
+                        input = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NEW_SCORE,
+                                        TDKScoreUtils.SCORE_NUMERIC_REGEX,
+                                        TDKScoreUtils.extractTextFromHtml(label.getText()));
                         if (StringUtils.isNoneEmpty(input)) {
                             matchController.setManualRoundScore(PlayerColor.BLUE, Integer.parseInt(input));
                         }
-                    case "redScore":
-                        input=TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NEW_SCORE, TDKScoreUtils.NUMERIC_REGEX, label.getText());
+                        break;
+                    case "competitorScoreRED":
+                        input = TDKScoreUtils.getInputText(
+                                TDKScoreUtils.INPUT_MESSAGE_NEW_SCORE,
+                                TDKScoreUtils.SCORE_NUMERIC_REGEX,
+                                TDKScoreUtils.extractTextFromHtml(label.getText()));
                         if (StringUtils.isNoneEmpty(input)) {
                             matchController.setManualRoundScore(PlayerColor.RED, Integer.parseInt(input));
                         }
                         break;
 
-                    case "round":
-                        String blueWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de azul", TDKScoreUtils.NUMERIC_REGEX, "1");
-                        String redWins = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de rojo", TDKScoreUtils.NUMERIC_REGEX, "1");
-                        String roundScore = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para el round ", TDKScoreUtils.NUMERIC_REGEX, "1");
+                    case "roundScore":
+                        String blueWins = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de azul",
+                                        TDKScoreUtils.VICTORY_NUMERIC_REGEX,
+                                        "-1");
+                        String redWins = TDKScoreUtils
+                                .getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para las victorias de rojo",
+                                        TDKScoreUtils.VICTORY_NUMERIC_REGEX,
+                                        "-1");
+                        String roundScore = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NUMERIC + "\n para el round ",
+                                        TDKScoreUtils.ROUND_NUMERIC_REGEX,
+                                        "1");
                         if (StringUtils.isNoneEmpty(blueWins) && StringUtils.isNoneEmpty(redWins)) {
-                            // 📞 Llama al Controller. ELIMINAR manipulación directa de jLabelList
+                            //  Llama al Controller. ELIMINAR manipulación directa de jLabelList
                             matchController.setManualRoundWins(Integer.parseInt(blueWins), Integer.parseInt(redWins));
                             matchController.manualUpdateRoundNumber(Integer.parseInt(roundScore));
                         }
-                    case "match":
-                        input = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_NUMERIC, TDKScoreUtils.NUMERIC_REGEX, label.getText());
+                        break;
+                    case "matchScore":
+                        input = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_NUMERIC,
+                                        TDKScoreUtils.SCORE_NUMERIC_REGEX,
+                                        TDKScoreUtils.extractTextFromHtml(label.getText()));
                         if (StringUtils.isNoneEmpty(input)) {
-                            // 📞 Llama al Controller
+                            //  Llama al Controller
                             matchController.manualUpdateMatchNumber(Integer.parseInt(input));
                         }
                         break;
-                    case "timer":
-                        String matchTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del round", TDKScoreUtils.TIME_REGEX, "");
-                        String breakTime = TDKScoreUtils.getInputText(TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso", TDKScoreUtils.TIME_REGEX, "");
+                    case "timeScore":
+                        String matchTime = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del round",
+                                        TDKScoreUtils.TIME_REGEX,
+                                        "");
+                        String breakTime = TDKScoreUtils
+                                .getInputText(
+                                        TDKScoreUtils.INPUT_MESSAGE_TIME + "\n para la duración del descanso",
+                                        TDKScoreUtils.TIME_REGEX,
+                                        "");
 
-                        // 📞 Llama al Controller
+                        //  Llama al Controller
                         if (StringUtils.isNoneEmpty(matchTime) && StringUtils.isNoneEmpty(breakTime)) {
                             matchController.manualUpdateAndResetMatchTimes(matchTime, breakTime);
                         }
@@ -82,7 +143,6 @@ public class TDKMouseListener implements MouseListener {
         }
 
     }
-
 
 
     @Override

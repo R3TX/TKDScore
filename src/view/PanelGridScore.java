@@ -5,6 +5,7 @@ import utils.ComponentBuilder;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 
 public class PanelGridScore extends JPanel {
@@ -34,7 +35,16 @@ public class PanelGridScore extends JPanel {
         gbc.weightx = gridWeightx * 2;
         gbc.weighty = 0.15;
 
-        competitorName = ComponentBuilder.createAndAddLabel(this, gbc, "Nombre del competidor", JLabel.CENTER, false, statSize);
+        competitorName = ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "Nombre del competidor",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        "name" + playerColor);
+
 
         // label for victories name
         if (PlayerColor.RED.equals(playerColor)) {
@@ -50,14 +60,31 @@ public class PanelGridScore extends JPanel {
         gbc.weightx = gridWeightx;
         gbc.weighty = 0.075;
 
-        ComponentBuilder.createAndAddLabel(this, gbc, "Victorias", JLabel.CENTER, false, statSize);
+        ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "Victorias",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        null);
 
         // Label for victories count
 
         gbc.gridy = 1;
         gbc.weightx = gridWeightx;
         gbc.weighty = 0.075;
-        victoriesCount = ComponentBuilder.createAndAddLabel(this, gbc, "0", JLabel.CENTER, false, statSize);
+        victoriesCount = ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "0",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        "victoryScore" + playerColor);
+
 
         gbc.gridy = 2;
         gbc.gridheight = 1;
@@ -67,7 +94,16 @@ public class PanelGridScore extends JPanel {
         gbc.gridx = 1;
         gbc.gridwidth = 1;
         gbc.weightx = gridWeightx;
-        competitorScore = ComponentBuilder.createAndAddLabel(this, gbc, "0", JLabel.CENTER, true, statSize);
+        competitorScore = ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "0",
+                        JLabel.CENTER,
+                        true,
+                        statSize,
+                        "competitorScore" + playerColor);
+
 
         //name's row
         gbc.gridy = 3;
@@ -82,13 +118,29 @@ public class PanelGridScore extends JPanel {
             gbc.gridx = 2;
         }
         gbc.weightx = gridWeightx;
-        ComponentBuilder.createAndAddLabel(this, gbc, "GAM-JEOM", JLabel.CENTER, false, statSize);
+        ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "GAM-JEOM",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        null);
 
         // label for head kicks name
         gbc.gridx = 1;
         gbc.weightx = gridWeightx;
         gbc.gridwidth = 1;
-        ComponentBuilder.createAndAddLabel(this, gbc, "Técnica alta", JLabel.CENTER, false, statSize);
+        ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "Técnica alta",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        null);
 
         //empty space name
         if (PlayerColor.RED.equals(playerColor)) {
@@ -98,7 +150,15 @@ public class PanelGridScore extends JPanel {
         }
         gbc.weightx = gridWeightx;
         gbc.gridwidth = 1;
-        ComponentBuilder.createAndAddLabel(this, gbc, "", JLabel.CENTER, false, statSize);
+        ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        null);
 
         //Counters row
         gbc.gridy = 4;
@@ -112,13 +172,31 @@ public class PanelGridScore extends JPanel {
         }
         gbc.weightx = gridWeightx;
         gbc.gridwidth = 1;
-        gamjeonCount = ComponentBuilder.createAndAddLabel(this, gbc, "0", JLabel.CENTER, false, statSize);
+        gamjeonCount = ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "0",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        "gamjeonScore" + playerColor);
+
 
         // Head kicks count
         gbc.gridx = 1;
         gbc.weightx = gridWeightx;
         gbc.gridwidth = 1;
-        headKickCount = ComponentBuilder.createAndAddLabel(this, gbc, "0", JLabel.CENTER, false, statSize);
+        headKickCount = ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "0",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        "headKickScore" + playerColor);
+
 
         //empty space score
         if (PlayerColor.RED.equals(playerColor)) {
@@ -129,7 +207,15 @@ public class PanelGridScore extends JPanel {
 
         gbc.weightx = gridWeightx;
         gbc.gridwidth = 1;
-        ComponentBuilder.createAndAddLabel(this, gbc, "", JLabel.CENTER, false, statSize);
+        ComponentBuilder
+                .createAndAddLabel(
+                        this,
+                        gbc,
+                        "",
+                        JLabel.CENTER,
+                        false,
+                        statSize,
+                        null);
     }
 
     public JLabel getCompetitorName() {
@@ -170,5 +256,13 @@ public class PanelGridScore extends JPanel {
 
     public void setVictoriesCount(JLabel victoriesCount) {
         this.victoriesCount = victoriesCount;
+    }
+
+    public void setMouseListener(MouseListener mouseListener) {
+        competitorName.addMouseListener(mouseListener);
+        victoriesCount.addMouseListener(mouseListener);
+        competitorScore.addMouseListener(mouseListener);
+        gamjeonCount.addMouseListener(mouseListener);
+        headKickCount.addMouseListener(mouseListener);
     }
 }

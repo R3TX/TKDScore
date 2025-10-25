@@ -1,6 +1,7 @@
 package view;
 
 import controller.listeners.Chronometer;
+import controller.listeners.TDKMouseListener;
 import controller.listeners.TKDKeyListener;
 import controller.match.MatchController;
 import model.repository.CompetitorDAO;
@@ -66,6 +67,7 @@ public class Board {
         Chronometer chronometer = new Chronometer(matchController, "00:10", "00:05");
         matchController.setChronometerAndUpdateTimes(chronometer);
         scoreboardView.addKeyListener(new TKDKeyListener(matchController));
+        scoreboardView.setMouseListenerToComponent(new TDKMouseListener(matchController));
         /*
         // 4. Instanciar la Capa de Controladores, inyectando Servicios
         // CompetitorController competitorController = new CompetitorController(competitorService);

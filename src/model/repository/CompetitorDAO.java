@@ -14,6 +14,11 @@ public class CompetitorDAO {
     private static final String SELECT_BY_ID_SQL =
             "SELECT * FROM " + TABLE_NAME + " WHERE COMPETITOR_ID = ?";
 
+    private static final String UPDATE_SQL =
+            "UPDATE " + TABLE_NAME +
+                    " SET NAME = ?, ASSIGNED_COLOR = ?" +
+                    " WHERE COMPETITOR_ID = ? ";
+
     /**
      * Finds a CompetitorEntity by its unique ID.
      */
@@ -52,6 +57,27 @@ public class CompetitorDAO {
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return competitor;
+    }
+
+    public CompetitorEntity update(CompetitorEntity competitor) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_SQL)) {
+
+            // 1. Asignar los valores del SET (Parámetros 1 a 4)
+            stmt.setString(1, competitor.getName());
+            stmt.setString(2, competitor.getAssignedColor());
+
+            stmt.setInt(3, competitor.getuId());
+
+            // 3. Ejecutar la actualización
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("updated competitor: " + competitor.getuId());
+
+        } catch (SQLException e) {
+            System.err.println("error trying to update competitor: " + competitor.getuId());
             e.printStackTrace();
         }
         return competitor;
