@@ -118,23 +118,28 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
 
         // 3. Initialize state
         updateRoundNumber(1);
-        restoreInitialScoreAndFouls();
+        restoreScoreFoulsHeadKick();
         JOptionPane.showMessageDialog(this, "Match " + match.getMatchNumber() + " started!", "New Match", JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Override
     public void onRoundConcluded(PlayerColor playerColor, boolean isBreakTime) {
         // 1. Clear the scoreboard from the previous round
-        restoreInitialScoreAndFouls();
+        //restoreInitialScoreAndFouls();
 
         // 2. Handle the break/pause state
         if (isBreakTime) {
             timePanel.getBreakName().setVisible(true);
+            paintWinner(playerColor);
         } else {
             timePanel.getBreakName().setVisible(false);
+            restoreWinnerColor();
         }
+        // NOTE: updateRoundWins() must be called by the controller after updating the model.
+    }
 
-        // 3. Highlight the round winner (if applicable)
+    // 3. Highlight the round winner (if applicable)
+    private void paintWinner(PlayerColor playerColor){
         if (playerColor != null) {
             PanelGridScore winnerPanel = PlayerColor.RED.equals(playerColor)
                     ? redPanel : bluePanel;
@@ -143,8 +148,12 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
 
             JOptionPane.showMessageDialog(this, "Round concluded! Winner ID: " + playerColor, "End Round", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
 
-        // NOTE: updateRoundWins() must be called by the controller after updating the model.
+    //Restore winner color
+    private void restoreWinnerColor(){
+        redPanel.getCompetitorScore().setBackground(TDKScoreUtils.RED_COLOR);
+        bluePanel.getCompetitorScore().setBackground(TDKScoreUtils.BLUE_COLOR);
     }
 
     @Override
@@ -159,7 +168,7 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     @Override
     public void restoreInitialState() {
         // Resets all counters to zero or initial state.
-        restoreInitialScoreAndFouls();
+        restoreScoreFoulsHeadKick();
         updateRoundWins(0, 0);
         updateRoundNumber(1);
         updateText(timePanel.getMatchScore(), "1");
@@ -174,8 +183,8 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     }
 
     // --- View Auxiliary Methods (UI) ---
-
-    private void restoreInitialScoreAndFouls() {
+    @Override
+    public void restoreScoreFoulsHeadKick() {
         // Resets only scores and fouls, useful at the start of each round.
         updateMainScore(0, 0);
         updateFouls(0, 0);

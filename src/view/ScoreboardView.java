@@ -93,4 +93,13 @@ public interface ScoreboardView {
      * @param matchNumber
      */
     void updateMatchNumber(int matchNumber);
+
+    /**
+     * sets labels text to '0' for
+     * Head Kick
+     * Fault
+     * Score
+     *
+     */
+    void restoreScoreFoulsHeadKick();
 }
