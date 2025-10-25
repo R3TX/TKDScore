@@ -1,5 +1,6 @@
 package utils;
 
+import org.apache.commons.lang3.StringUtils;
 import view.adapter.FontResizerUtility;
 
 import javax.swing.*;
@@ -32,7 +33,8 @@ public class ComponentBuilder {
             String text,
             int alignment,
             boolean isOpaque,
-            Dimension statSize) {
+            Dimension statSize,
+            String labelName) {
 
         JLabel label = new JLabel(TDKScoreUtils.formatTextColor(text));
 
@@ -49,6 +51,9 @@ public class ComponentBuilder {
             label.setPreferredSize(statSize);
         }
         label.setOpaque(isOpaque);
+        if (null != label && StringUtils.isNotBlank(labelName)) {
+            label.setName(labelName);
+        }
 
         // Add to the container
         container.add(label, gbc);

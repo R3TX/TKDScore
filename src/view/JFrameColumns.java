@@ -6,6 +6,7 @@ import utils.TDKScoreUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 public class JFrameColumns extends JFrame implements ScoreboardView {
 
@@ -27,7 +28,6 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         int panelWidth10 = (int) (frameWidth * 0.10);
 
         Dimension preferredSize45 = new Dimension(panelWidth45, 1);
-
         // Panel 1
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -68,15 +68,15 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
 
     @Override
     public void updateMainScore(int redScore, int blueScore) {
-        updateText(redPanel.getCompetitorScore(),String.valueOf(redScore));
-        updateText(bluePanel.getCompetitorScore(),String.valueOf(blueScore));
+        updateText(redPanel.getCompetitorScore(), String.valueOf(redScore));
+        updateText(bluePanel.getCompetitorScore(), String.valueOf(blueScore));
     }
 
     @Override
     public void updateFouls(int redFouls, int blueFouls) {
         // The view uses the GAM-JEOM count
-        updateText(redPanel.getGamjeonCount(),String.valueOf(redFouls));
-        updateText(bluePanel.getGamjeonCount(),String.valueOf(blueFouls));
+        updateText(redPanel.getGamjeonCount(), String.valueOf(redFouls));
+        updateText(bluePanel.getGamjeonCount(), String.valueOf(blueFouls));
     }
 
     @Override
@@ -86,14 +86,14 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
 
     @Override
     public void updateRoundNumber(int roundNumber) {
-        updateText(timePanel.getRoundScore(),String.valueOf(roundNumber));
+        updateText(timePanel.getRoundScore(), String.valueOf(roundNumber));
     }
 
     @Override
     public void updateRoundWins(int redWins, int blueWins) {
         // The view uses 'victoriesCount' for total rounds won in the match
-        updateText(redPanel.getVictoriesCount(),String.valueOf(redWins));
-        updateText(bluePanel.getVictoriesCount(),String.valueOf(blueWins));
+        updateText(redPanel.getVictoriesCount(), String.valueOf(redWins));
+        updateText(bluePanel.getVictoriesCount(), String.valueOf(blueWins));
     }
 
     // --- Game Flow and State Methods ---
@@ -101,19 +101,19 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     @Override
     public void onMatchStarted(MatchEntity match) {
         // 1. Update match number
-        updateText(timePanel.getMatchScore(),String.valueOf(match.getMatchNumber()));
+        updateText(timePanel.getMatchScore(), String.valueOf(match.getMatchNumber()));
 
         // 2. Update competitor names (assuming MatchController can retrieve them)
         try {
             // These methods must exist in MatchController to decouple the view from the DAO.
             String redName = match.getRedCompetitor().getName();
             String blueName = match.getBlueCompetitor().getName();
-            updateText(redPanel.getCompetitorName(),redName);
-            updateText(bluePanel.getCompetitorName(),blueName);
+            updateText(redPanel.getCompetitorName(), redName);
+            updateText(bluePanel.getCompetitorName(), blueName);
         } catch (Exception e) {
             System.err.println("Error setting competitor names: " + e.getMessage());
-            updateText(redPanel.getCompetitorName(),"RED");
-            updateText(bluePanel.getCompetitorName(),"BLUE");
+            updateText(redPanel.getCompetitorName(), "RED");
+            updateText(bluePanel.getCompetitorName(), "BLUE");
         }
 
         // 3. Initialize state
@@ -129,9 +129,9 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
 
         // 2. Handle the break/pause state
         if (isBreakTime) {
-            timePanel.getBreackName().setVisible(true);
+            timePanel.getBreakName().setVisible(true);
         } else {
-            timePanel.getBreackName().setVisible(false);
+            timePanel.getBreakName().setVisible(false);
         }
 
         // 3. Highlight the round winner (if applicable)
@@ -162,12 +162,12 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         restoreInitialScoreAndFouls();
         updateRoundWins(0, 0);
         updateRoundNumber(1);
-        updateText(timePanel.getMatchScore(),"1");
+        updateText(timePanel.getMatchScore(), "1");
 
         // Reset styles and colors
         redPanel.getCompetitorScore().setBackground(TDKScoreUtils.RED_COLOR);
         bluePanel.getCompetitorScore().setBackground(TDKScoreUtils.BLUE_COLOR);
-        timePanel.getBreackName().setVisible(false);
+        timePanel.getBreakName().setVisible(false);
 
         // Chronometer logic
         // chronometer.restartTime(chronometer.getMatchTime());
@@ -184,8 +184,8 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     }
 
     public void updateNames(String redName, String blueName) {
-        updateText(redPanel.getCompetitorName(),redName);
-        updateText(bluePanel.getCompetitorName(),blueName);
+        updateText(redPanel.getCompetitorName(), redName);
+        updateText(bluePanel.getCompetitorName(), blueName);
     }
 
     @Override
@@ -202,5 +202,12 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
         label.setText(TDKScoreUtils.formatTextColor(text));
         TDKScoreUtils.formatJlabelText(label);
         label.repaint();
+    }
+
+    public void setMouseListenerToComponent(MouseListener mouseListener) {
+        redPanel.setMouseListener(mouseListener);
+        bluePanel.setMouseListener(mouseListener);
+        timePanel.setMouseListener(mouseListener);
+
     }
 }

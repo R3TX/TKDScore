@@ -9,7 +9,9 @@ import java.util.regex.Pattern;
 
 public class TDKScoreUtils {
     public static final String NAME_REGEX = "^[a-zA-Z ]+$";
-    public static final String NUMERIC_REGEX = "^[0-9]+$";
+    public static final String SCORE_NUMERIC_REGEX = "^[0-9]+$";
+    public static final String ROUND_NUMERIC_REGEX = "^[1-3]+$";
+    public static final String VICTORY_NUMERIC_REGEX = "^[0-2]+$";
     public static final String TIME_REGEX = "(0?[0-9]|[1-5][0-9]):(0[0-9]|[1-5][0-9])";
     public static final String INPUT_MESSAGE_NAME = "Por favor escriba el Nombre ";
     public static final String INPUT_MESSAGE_NEW_SCORE = "Por favor escriba el nuevo marcador ";
@@ -20,7 +22,6 @@ public class TDKScoreUtils {
     public static Color RED_COLOR = new Color(255, 51, 51);
     public static String style = "style='color: white; text-shadow: -2px 0 black, 0 2px black, 2px 0 black, 0 -2px black;'";
     private static final Pattern TEXT_PATTERN = Pattern.compile("(?s)>([^<]*)</");
-
 
 
     public static String getInputText(String inputMessage, String regex, String defaultValue) {
@@ -55,7 +56,7 @@ public class TDKScoreUtils {
         return "<html><span " + style + ">" + newText + "</span></html>";
     }
 
-    public static void formatJlabelText(JLabel label){
+    public static void formatJlabelText(JLabel label) {
         String htmlText = label.getText();
         String currentText = extractTextFromHtml(htmlText);
 
@@ -82,13 +83,14 @@ public class TDKScoreUtils {
             label.repaint();
         }
     }
+
     /**
      * Extrae la cadena de texto visible de una cadena que contiene HTML simple.
      *
      * @param html La cadena HTML completa del JLabel.
      * @return El texto puro a medir.
      */
-    private static String extractTextFromHtml(String html) {
+    public static String extractTextFromHtml(String html) {
         if (html == null || !html.startsWith("<html>")) {
             // No es HTML o es texto plano, lo devolvemos directamente.
             return html != null ? html : "";
