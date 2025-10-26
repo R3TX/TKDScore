@@ -9,7 +9,10 @@ import model.service.RoundStatisticsService;
 import view.ScoreboardView;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MatchController implements ChronometerListener {
     private final MatchService matchService;
@@ -388,8 +391,7 @@ public class MatchController implements ChronometerListener {
         saveCurrentRound();
 
         //get statistics
-        List<RoundEntity> roundList = roundService.findByMarchId(currentMatch.getuId());
-
+        Map<Integer,List<RoundStatisticsEntity>> statisticsEntityMap = getAllStatisticsForCurrentMatch();
 
 
         //create a new match
@@ -404,11 +406,62 @@ public class MatchController implements ChronometerListener {
         showWinnerMessage(isBlueWinner); // Muestra el mensaje de ganador
     }
 
+    private Map<Integer,List<RoundStatisticsEntity>> getAllStatisticsForCurrentMatch(){
+
+        Map<Integer,List<RoundStatisticsEntity>> statisticsEntityMap = new HashMap();
+
+        List<RoundEntity> roundList = roundService.findByMarchId(currentMatch.getuId());
+        roundList.forEach(round->{
+            round.setRoundStatisticsEntities(statsService.findByRoundId(round.getRoundId()));
+            round.getRoundStatisticsEntities().forEach(statistics -> {
+                statisticsEntityMap
+                        .computeIfAbsent(statistics.getCompetitor().getuId(), k -> new ArrayList<>())
+                        .add(statistics);
+            });
+        });
+        statisticsEntityMap.forEach((competitorId, statsList) -> {
+
+            // --- Simulación de Obtención del Nombre (Ajusta esto si tienes un servicio) ---
+            // En un caso real, podrías necesitar un servicio para obtener el nombre del competidor
+            // usando el competitorId. Aquí usamos el ID directamente.
+            String nameDisplay = "Competidor ID: " + competitorId;
+            // ---------------------------------------------------------------------------------
+
+            System.out.println("\n" + nameDisplay);
+            System.out.println("----------------------------------------");
+
+            // 2. Imprimir cada estadística en la lista
+            if (statsList.isEmpty()) {
+                System.out.println("No se encontraron estadísticas para este competidor.");
+            } else {
+                int totalGamJeom = 0;
+                int totalPoints = 0;
+
+                for (RoundStatisticsEntity stats : statsList) {
+                    // Asumiendo que RoundStatisticsEntity tiene los getters:
+                    System.out.printf("  [Ronda %d] - Faltas (Gam-Jeom): %d, Puntos Anotados: %d, cabeza: %d\n",
+                            stats.getRound().getRoundId(),
+                            stats.getGamJeomFouls(),
+                            stats.getBaseScore(),
+                            stats.getHeadKicks());
+
+                    totalGamJeom += stats.getGamJeomFouls();
+                    totalPoints += stats.getBaseScore();
+                }
+
+                System.out.println("  TOTAL DE FALTAS ACUMULADAS: " + totalGamJeom);
+                System.out.println("  TOTAL DE PUNTOS ANOTADOS: " + totalPoints);
+            }
+        });
+        return statisticsEntityMap;
+    }
+
     public void startNewMatch(){
         CompetitorEntity competitorRed = competitorService.save(new CompetitorEntity("RED", PlayerColor.RED.name()));
         CompetitorEntity competitorBlue = competitorService.save(new CompetitorEntity("BLUE", PlayerColor.BLUE.name()));
         currentMatch = matchService.createNewMatch(currentMatch.getMatchNumber()+1, competitorRed.getuId(), competitorBlue.getuId());
         currentRound = roundService.startNewRound(currentMatch.getuId(), 1);
+        currentRoundNumber=1;
         redStatics = statsService.createStats(currentRound.getRoundId(), competitorRed.getuId());
         blueStatics = statsService.createStats(currentRound.getRoundId(), competitorBlue.getuId());
     }

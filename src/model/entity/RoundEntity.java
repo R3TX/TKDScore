@@ -1,5 +1,8 @@
 package model.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RoundEntity {
     private int roundId;
     private MatchEntity match;
@@ -7,6 +10,7 @@ public class RoundEntity {
     private CompetitorEntity roundWinner; // Use Integer to allow NULL
     private int finalRedScore;
     private int finalBlueScore;
+    private List<RoundStatisticsEntity> roundStatisticsEntities;
 
     public RoundEntity() {}
 
@@ -17,6 +21,7 @@ public class RoundEntity {
         this.roundWinner = roundWinner;
         this.finalRedScore = finalRedScore;
         this.finalBlueScore = finalBlueScore;
+        this.roundStatisticsEntities = new ArrayList<>();
     }
 
     // Getters
@@ -27,6 +32,10 @@ public class RoundEntity {
     public int getFinalRedScore() { return finalRedScore; }
     public int getFinalBlueScore() { return finalBlueScore; }
 
+    public List<RoundStatisticsEntity> getRoundStatisticsEntities() {
+        return roundStatisticsEntities;
+    }
+
     // Setters
     public void setRoundId(int roundId) { this.roundId = roundId; }
     public void setMatch(MatchEntity match) { this.match = match; }
@@ -34,4 +43,8 @@ public class RoundEntity {
     public void setRoundWinner(CompetitorEntity roundWinner) { this.roundWinner = roundWinner; }
     public void setFinalRedScore(int finalRedScore) { this.finalRedScore = finalRedScore; }
     public void setFinalBlueScore(int finalBlueScore) { this.finalBlueScore = finalBlueScore; }
+
+    public void setRoundStatisticsEntities(List<RoundStatisticsEntity> roundStatisticsEntities) {
+        this.roundStatisticsEntities = roundStatisticsEntities;
+    }
 }

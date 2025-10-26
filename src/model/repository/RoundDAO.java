@@ -4,6 +4,8 @@ import model.entity.RoundEntity;
 import utils.DatabaseConnection;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class RoundDAO {
@@ -94,7 +96,7 @@ public class RoundDAO {
      * Finds a RoundEntity by its unique ID.
      */
     public Optional<RoundEntity> findById(int id) {
-        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE ROUND_ID = ?";
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE ROUND_ID = ? ";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -108,6 +110,28 @@ public class RoundDAO {
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    public List<RoundEntity> findByMatchId(int id) {
+
+        List<RoundEntity> rounds = new ArrayList<>();
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE MATCH_ID = ? ORDER BY ROUND_NUMBER ASC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // Mapea la fila actual a una entidad RoundEntity
+                    RoundEntity round = mapResultSetToRound(rs);
+                    // Añade la entidad a la lista
+                    rounds.add(round);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rounds;
     }
 
     private RoundEntity mapResultSetToRound(ResultSet rs) throws SQLException {

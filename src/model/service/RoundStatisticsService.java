@@ -7,6 +7,7 @@ import model.repository.CompetitorDAO;
 import model.repository.RoundDAO;
 import model.repository.RoundStatisticsDAO;
 
+import java.util.List;
 import java.util.Optional;
 
 public class RoundStatisticsService {
@@ -112,5 +113,9 @@ public class RoundStatisticsService {
     public void updateStatistics(RoundStatisticsEntity roundStatisticsEntity){
 
         statsDAO.updateRoundStatistics(roundStatisticsEntity);
+    }
+
+    public List<RoundStatisticsEntity> findByRoundId(int roundId){
+        return statsDAO.findByRoundId(roundId);
     }
 }

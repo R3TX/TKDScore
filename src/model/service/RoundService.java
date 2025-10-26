@@ -6,6 +6,7 @@ import model.repository.CompetitorDAO;
 import model.repository.MatchDAO;
 import model.repository.RoundDAO;
 
+import java.util.List;
 import java.util.Optional;
 
 public class RoundService {
@@ -86,5 +87,9 @@ public class RoundService {
      */
     public Optional<RoundEntity> findById(int roundId) {
         return roundDAO.findById(roundId);
+    }
+
+    public List<RoundEntity> findByMarchId(int matchId){
+        return roundDAO.findByMatchId(matchId);
     }
 }

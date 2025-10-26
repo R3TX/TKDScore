@@ -1,9 +1,12 @@
 package model.repository;
 
+import model.entity.RoundEntity;
 import model.entity.RoundStatisticsEntity;
 import utils.DatabaseConnection;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class RoundStatisticsDAO {
@@ -115,5 +118,27 @@ public class RoundStatisticsDAO {
         entity.setGamJeomFouls(rs.getInt("GAM_JEOM_FOULS"));
         entity.setHeadKicks(rs.getInt("HEAD_KICKS"));
         return entity;
+    }
+
+    public List<RoundStatisticsEntity> findByRoundId(int id) {
+
+        List<RoundStatisticsEntity> rounds = new ArrayList<>();
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE ROUND_ID = ? ORDER BY ROUND_ID ASC ";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // Mapea la fila actual a una entidad RoundEntity
+                    RoundStatisticsEntity round = mapResultSetToStats(rs);
+                    // Añade la entidad a la lista
+                    rounds.add(round);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rounds;
     }
 }
