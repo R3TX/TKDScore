@@ -2,11 +2,14 @@ package view;
 
 import model.entity.MatchEntity;
 import model.entity.PlayerColor;
+import model.entity.RoundStatisticsEntity;
 import utils.TDKScoreUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseListener;
+import java.util.List;
+import java.util.Map;
 
 public class JFrameColumns extends JFrame implements ScoreboardView {
 
@@ -146,7 +149,7 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
             // It's assumed we only want to temporarily highlight the score with a different color.
             winnerPanel.getCompetitorScore().setBackground(Color.YELLOW);
 
-            JOptionPane.showMessageDialog(this, "Round concluded! Winner ID: " + playerColor, "End Round", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ganador:\n" + playerColor, "¡Ronda Finalizada!", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -157,26 +160,31 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     }
 
     @Override
-    public void onMatchConcluded(PlayerColor playerColor) {
+    public void onMatchConcluded(Map<Integer, List<RoundStatisticsEntity>> playersScore) {
 
-        JOptionPane.showMessageDialog(this, "Match Finished! Overall Winner: " + playerColor, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-
+        //JOptionPane.showMessageDialog(this, "Match Finished! Overall Winner: " + playerColor, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        PanelPlayersScore panelPlayersScore = new PanelPlayersScore(playersScore);
+        JFrame jFrame = new JFrame();
+        jFrame.setContentPane(panelPlayersScore);
+        jFrame.setSize(800,600);
+        jFrame.setVisible(true);
+        jFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         // Call full state restoration after showing the message.
-        restoreInitialState();
+        //restoreInitialState();
     }
 
     @Override
-    public void restoreInitialState() {
+    public void restoreInitialState(int matchNumber) {
         // Resets all counters to zero or initial state.
         restoreScoreFoulsHeadKick();
         updateRoundWins(0, 0);
         updateRoundNumber(1);
-        updateText(timePanel.getMatchScore(), "1");
-
         // Reset styles and colors
-        redPanel.getCompetitorScore().setBackground(TDKScoreUtils.RED_COLOR);
-        bluePanel.getCompetitorScore().setBackground(TDKScoreUtils.BLUE_COLOR);
         timePanel.getBreakName().setVisible(false);
+
+        updateNames(PlayerColor.RED.name(), PlayerColor.BLUE.name());
+        updateMatchNumber(matchNumber);
+        restoreWinnerColor();
 
     }
 
