@@ -89,7 +89,7 @@ public class RoundService {
         return roundDAO.findById(roundId);
     }
 
-    public List<RoundEntity> findByMarchId(int matchId){
+    public List<RoundEntity> findByMatchId(int matchId){
         return roundDAO.findByMatchId(matchId);
     }
 }

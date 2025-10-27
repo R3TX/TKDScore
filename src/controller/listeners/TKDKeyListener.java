@@ -27,22 +27,22 @@ public class TKDKeyListener implements KeyListener {
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyChar();
         switch (keyCode) {
-            case '1':
+            case '3':
                 matchController.registerScore(PlayerColor.BLUE, 1);
                 break;
-            case '3':
+            case '1':
                 matchController.registerScore(PlayerColor.RED, 1);
                 break;
-            case '4':
+            case '6':
                 matchController.registerScore(PlayerColor.BLUE, 2);
                 break;
-            case '6':
+            case '4':
                 matchController.registerScore(PlayerColor.RED, 2);
                 break;
-            case '7':
+            case '9':
                 matchController.registerScore(PlayerColor.BLUE, 3);
                 break;
-            case '9':
+            case '7':
                 matchController.registerScore(PlayerColor.RED, 3);
                 break;
             case '-':
@@ -78,17 +78,4 @@ public class TKDKeyListener implements KeyListener {
     public void keyReleased(KeyEvent e) {
 
     }
-/*
-    private void scorePlus(JLabel jLabel, int plus, boolean isFault, boolean isDecreasing) {
-        if((((chronometer.isRunning() || isFault) && !chronometer.isIS_BREAK_TIME() )  ||  (!chronometer.isRunning() && isDecreasing)) && (Integer.parseInt(jLabel.getText())+plus)>=0){
-            int currentScore = Integer.parseInt(jLabel.getText()) + plus;
-            jLabel.setText(String.valueOf(currentScore));
-            if (currentScore > 9) {
-                int widthSeparationScore = (widthSeparation / 3);
-                jLabelList.get(1).setBounds(widthSeparationScore, heightLabel, widthSeparation * 2, (int) (screenSize.getHeight() - (heightLabel * 3)));
-                jLabel.setFont(new Font(jLabel.getFont().getFontName(), jLabel.getFont().getStyle(), TDKScoreUtils.findFontSizeByJLabelSize(jLabel.getFont(), jLabel)));
-            }
-        }
-    }
-*/
 }

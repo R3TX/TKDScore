@@ -2,6 +2,10 @@ package view;
 
 import model.entity.MatchEntity;
 import model.entity.PlayerColor;
+import model.entity.RoundStatisticsEntity;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface that defines the contract for the UI (JFrameColumns)
@@ -65,14 +69,14 @@ public interface ScoreboardView {
     /**
      * Notifies the view that the match is officially over and displays the final winner screen.
      *
-     * @param playerColor The ID of the overall match winner.
+     * @param playersScore
      */
-    void onMatchConcluded(PlayerColor playerColor);
+    void onMatchConcluded(Map<Integer, List<RoundStatisticsEntity>> playersScore);
 
     /**
      * Resets all visual elements (scores, fouls, round wins) to zero or initial state.
      */
-    void restoreInitialState();
+    void restoreInitialState(int matchNumber);
 
     /**
      * Updates names
