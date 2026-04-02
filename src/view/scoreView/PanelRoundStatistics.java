@@ -1,12 +1,17 @@
-package view;
+package view.scoreView;
 
+import controller.listeners.TDKScoreViewMouseListener;
+import model.entity.CommonComponentsName;
 import model.entity.RoundStatisticsEntity;
 import model.entity.StatConfig;
 import utils.ComponentBuilder;
 import utils.TDKScoreUtils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -15,13 +20,15 @@ import java.util.Map;
 
 public class PanelRoundStatistics extends JPanel {
     private Map<String, JLabel> statLabelsMap;
-    private List<StatConfig> commonStats;
+    private List<StatConfig> commonStats = CommonComponentsName.commonStats;
+    private TDKScoreViewMouseListener tdkScoreViewMouseListener;
 
     public PanelRoundStatistics(RoundStatisticsEntity roundStat, int roundNumber) {
+        tdkScoreViewMouseListener = new TDKScoreViewMouseListener();
         setLayout(new GridBagLayout());
         Dimension statSize = new Dimension(50, 40);
         GridBagConstraints gbc = new GridBagConstraints();
-        createCommonStatsList();
+       // createCommonStatsList();
 
         setOpaque(false);
         gbc.fill = GridBagConstraints.BOTH;
@@ -45,7 +52,7 @@ public class PanelRoundStatistics extends JPanel {
         buildStatRows(commonStats, gridWeightx, statSize, gbc);
         getLabelAndValueToUpDate(commonStats, roundStat);
     }
-
+/*
     private void createCommonStatsList() {
         commonStats = List.of(
                 new StatConfig("Gam-Jeon", "gamJeomCount", "getGamJeomFouls"),
@@ -54,7 +61,7 @@ public class PanelRoundStatistics extends JPanel {
         );
     }
 
-
+*/
     private void getLabelAndValueToUpDate(List<StatConfig> commonStats, RoundStatisticsEntity stats) {
         for (StatConfig config : commonStats) {
             if (config.componentName() != null) {
@@ -140,6 +147,7 @@ public class PanelRoundStatistics extends JPanel {
             );
             if (componentId != null) {
                 statLabelsMap.put(componentId, counterLabel);
+                counterLabel.addMouseListener(tdkScoreViewMouseListener);
             }
         }
     }

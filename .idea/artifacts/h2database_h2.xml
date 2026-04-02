@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="h2database_h2">
+    <output-path>$PROJECT_DIR$/out/artifacts/h2database_h2</output-path>
+    <root id="root">
+      <element id="library" level="project" name="h2database.h2" />
+    </root>
+  </artifact>
+</component>

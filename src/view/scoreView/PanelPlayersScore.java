@@ -1,4 +1,4 @@
-package view;
+package view.scoreView;
 
 import model.entity.PlayerColor;
 import model.entity.RoundStatisticsEntity;
@@ -11,8 +11,10 @@ import java.util.Map;
 
 public class PanelPlayersScore extends JPanel {
 
-    public PanelPlayersScore(Map<Integer, List<RoundStatisticsEntity>> playersScore) {
+    JFrame myContainer;
 
+    public PanelPlayersScore(Map<Integer, List<RoundStatisticsEntity>> playersScore, JFrame myContainer) {
+        this.myContainer = myContainer;
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -48,7 +50,19 @@ public class PanelPlayersScore extends JPanel {
             p.setBackground(competitorColor);
             add(p, gbc);
             gbc.gridx += 1;
+            System.out.println(gbc.gridx);
         });
+        createButtons(gbc,playersScore);
+    }
+
+    public void createButtons(GridBagConstraints gbc,Map<Integer, List<RoundStatisticsEntity>> playersScore){
+        gbc.gridy+=1;
+        gbc.gridx=0;
+        gbc.gridwidth=GridBagConstraints.REMAINDER;
+        gbc.fill=GridBagConstraints.NONE;
+        gbc.weighty = 0.1;
+        gbc.weightx = 1.0;
+        add(new JPanelbuttonsScoreView(playersScore, myContainer),gbc);
     }
 
 }

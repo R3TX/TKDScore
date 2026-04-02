@@ -1,4 +1,4 @@
-package view;
+package view.scoreView;
 
 import model.entity.RoundStatisticsEntity;
 

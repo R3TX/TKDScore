@@ -4,6 +4,7 @@ import model.entity.MatchEntity;
 import model.entity.PlayerColor;
 import model.entity.RoundStatisticsEntity;
 import utils.TDKScoreUtils;
+import view.scoreView.JframeScoreView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -163,12 +164,9 @@ public class JFrameColumns extends JFrame implements ScoreboardView {
     public void onMatchConcluded(Map<Integer, List<RoundStatisticsEntity>> playersScore) {
 
         //JOptionPane.showMessageDialog(this, "Match Finished! Overall Winner: " + playerColor, "Game Over", JOptionPane.INFORMATION_MESSAGE);
-        PanelPlayersScore panelPlayersScore = new PanelPlayersScore(playersScore);
-        JFrame jFrame = new JFrame();
-        jFrame.setContentPane(panelPlayersScore);
-        jFrame.setSize(800,600);
-        jFrame.setVisible(true);
-        jFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        JframeScoreView jFrame = new JframeScoreView(playersScore);
+        jFrame.initFrame();
+
         // Call full state restoration after showing the message.
         //restoreInitialState();
     }

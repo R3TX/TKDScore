@@ -2,13 +2,9 @@ package controller.listeners;
 
 import controller.match.MatchController;
 import model.entity.PlayerColor;
-import utils.TDKScoreUtils;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 
 public class TKDKeyListener implements KeyListener {
 

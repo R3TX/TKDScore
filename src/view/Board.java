@@ -4,6 +4,9 @@ import controller.listeners.Chronometer;
 import controller.listeners.TDKMouseListener;
 import controller.listeners.TKDKeyListener;
 import controller.match.MatchController;
+import model.entity.CompetitorEntity;
+import model.entity.PlayerColor;
+import model.entity.RoundStatisticsEntity;
 import model.repository.CompetitorDAO;
 import model.repository.MatchDAO;
 import model.repository.RoundDAO;
@@ -13,6 +16,14 @@ import model.service.MatchService;
 import model.service.RoundService;
 import model.service.RoundStatisticsService;
 import utils.TDKScoreUtils;
+import view.scoreView.JframeScoreView;
+import view.scoreView.PanelPlayersScore;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class Board {
@@ -50,6 +61,24 @@ public class Board {
         matchController.setChronometerAndUpdateTimes(chronometer);
         scoreboardView.addKeyListener(new TKDKeyListener(matchController));
         scoreboardView.setMouseListenerToComponent(new TDKMouseListener(matchController));
+
+
+        /*
+        Map<Integer, List<RoundStatisticsEntity>> playersScore = new HashMap<>();
+        RoundStatisticsEntity roundStatisticsEntity = new RoundStatisticsEntity();
+        RoundStatisticsEntity roundStatisticsEntityRed = new RoundStatisticsEntity();
+        roundStatisticsEntity.setCompetitor(new CompetitorEntity("javie",  PlayerColor.BLUE.name()));
+        roundStatisticsEntityRed.setCompetitor(new CompetitorEntity("red",  PlayerColor.RED.name()));
+        playersScore.put(1,List.of(roundStatisticsEntity,roundStatisticsEntity,roundStatisticsEntity));
+        playersScore.put(2,List.of(roundStatisticsEntityRed,roundStatisticsEntityRed,roundStatisticsEntityRed));
+        JframeScoreView jFrame = new JframeScoreView(playersScore);
+        jFrame.initFrame();
+
+
+        // Call full state restoration after showing the message.
+        //restoreInitialState();
+
+         */
     }
 
 }

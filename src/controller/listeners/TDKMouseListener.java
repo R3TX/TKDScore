@@ -5,7 +5,7 @@ import model.entity.PlayerColor;
 import org.apache.commons.lang3.StringUtils;
 import utils.TDKScoreUtils;
 
-import javax.swing.*;
+import javax.swing.JLabel;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
